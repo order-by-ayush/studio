@@ -116,7 +116,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
 
   return (
     <div className="flex w-full" aria-label="Command input">
-      <span className="text-accent shrink-0">[{username}@terminal:~$]</span>
+      <span className="text-accent shrink-0">{username}:~$</span>
       <div className="relative flex-grow pl-2">
         <div
           ref={inputRef}

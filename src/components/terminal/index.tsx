@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useLocalStorage from '@/hooks/use-local-storage';
-import { processCommand } from '@/lib/commands/index.tsx';
+import { processCommand } from '@/lib/commands';
 import { themes, isTheme, Theme } from '@/lib/themes';
 import AsciiHeader from './ascii-header';
 import Prompt, { type PromptHandle } from './prompt';
 import MatrixCanvas from './matrix-canvas';
+import TopBar from './top-bar';
 
 export type Output = {
   id: number;
@@ -16,7 +17,8 @@ export type Output = {
 };
 
 const Terminal = () => {
-  const [username, setUsername] = useLocalStorage('terminal-username', 'guest');
+  const [username, setUsername] = useLocalStorage('terminal-username', 'visitor');
+  const [hostname, setHostname] = useLocalStorage('terminal-hostname', 'iabhinav.me');
   const [theme, setTheme] = useLocalStorage<Theme>('terminal-theme', 'hacker');
   const [soundEnabled, setSoundEnabled] = useLocalStorage('terminal-sound', true);
   const [typingSpeed, setTypingSpeed] = useLocalStorage('terminal-speed', 20);
@@ -54,12 +56,32 @@ const Terminal = () => {
     setOutputs(prev => [...prev, { id: Date.now() + Math.random(), content, isCommand, command }]);
   }, []);
 
-  const runCommand = async (command: string) => {
-    if (shutdown) return;
+  const runCommand = useCallback(async (command: string) => {
+    if (shutdown) {
+        if (command.trim().toLowerCase() === 'poweron') {
+             processCommand({
+                command: 'poweron',
+                username,
+                addOutput,
+                clearOutputs: () => setOutputs([]),
+                setTheme: (newTheme) => {
+                    if (isTheme(newTheme)) setTheme(newTheme);
+                },
+                setUsername,
+                setSoundEnabled,
+                setTypingSpeed,
+                clearHistory: () => setHistory([]),
+                setShutdown,
+                playSound,
+                typingSpeed
+            });
+        }
+        return;
+    }
     
     setCommandInProgress(true);
     addToHistory(command);
-    addOutput(command, true, username);
+    addOutput(command, true, `${username}@${hostname}`);
     playSound('enter');
     
     await processCommand({
@@ -80,7 +102,7 @@ const Terminal = () => {
     });
     
     setCommandInProgress(false);
-  };
+  }, [shutdown, username, hostname, playSound, addOutput, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, setShutdown, typingSpeed]);
   
   const addToHistory = (command: string) => {
     if (command.trim() === '') return;
@@ -112,11 +134,11 @@ const Terminal = () => {
   useEffect(() => {
     if (!shutdown) {
       addOutput(<AsciiHeader />);
-      addOutput(`Initializing terminal... Welcome to Ayush's Portfolio.`);
-      addOutput('Type "help" for a list of available commands.');
+      addOutput(`Type '?' or 'help' to view a list of available commands.`);
     } else {
       addOutput("System is shut down. Type 'poweron' to restart.");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -127,42 +149,41 @@ const Terminal = () => {
   };
 
   return (
-    <div
-      ref={terminalRef}
-      className="h-screen w-full p-4 overflow-y-auto font-mono text-foreground"
-      onClick={handleTerminalClick}
-      role="log"
-      aria-live="polite"
-    >
-      {theme === 'matrix' && <MatrixCanvas />}
-      
-      {outputs.map((output) => (
-        <div key={output.id} className="output-line">
-          {output.isCommand ? (
-            <div className="flex">
-              <span className="text-accent">[{output.command}@terminal:~$]</span>
-              <span className="flex-1 pl-2">{output.content}</span>
-            </div>
-          ) : (
-            output.content
-          )}
-        </div>
-      ))}
-      
-      {!commandInProgress && (
-        <Prompt
-            ref={promptRef}
-            username={username}
-            onSubmit={runCommand}
-            history={history}
-            disabled={shutdown}
-        />
-      )}
-      
-      <div className="text-center text-xs text-muted-foreground mt-8">
-        Permissions (e.g., location) require explicit consent. No data is stored or shared. This is an educational demonstration.
+    <>
+      <TopBar />
+      <div
+        ref={terminalRef}
+        className="h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12"
+        onClick={handleTerminalClick}
+        role="log"
+        aria-live="polite"
+      >
+        {theme === 'matrix' && <MatrixCanvas />}
+        
+        {outputs.map((output) => (
+          <div key={output.id} className="output-line">
+            {output.isCommand ? (
+              <div className="flex">
+                <span className="text-accent">{output.command}:~$</span>
+                <span className="flex-1 pl-2">{output.content}</span>
+              </div>
+            ) : (
+              output.content
+            )}
+          </div>
+        ))}
+        
+        {!commandInProgress && (
+          <Prompt
+              ref={promptRef}
+              username={`${username}@${hostname}`}
+              onSubmit={runCommand}
+              history={history}
+              disabled={shutdown}
+          />
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
