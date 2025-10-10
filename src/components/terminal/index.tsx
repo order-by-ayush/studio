@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useLocalStorage from '@/hooks/use-local-storage';
-import { processCommand } from '@/lib/commands';
+import { processCommand } from '@/lib/commands/index.tsx';
 import { themes, isTheme, Theme } from '@/lib/themes';
 import AsciiHeader from './ascii-header';
 import Prompt, { type PromptHandle } from './prompt';

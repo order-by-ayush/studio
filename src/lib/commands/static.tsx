@@ -1,6 +1,6 @@
 import React from 'react';
 import { themes } from '@/lib/themes';
-import { commandList } from '.';
+import { commandList } from './index.tsx';
 
 const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',

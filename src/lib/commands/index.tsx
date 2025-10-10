@@ -64,4 +64,3 @@ export const processCommand = async (context: CommandContext) => {
         context.playSound('error');
     }
 };
-
