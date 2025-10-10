@@ -9,6 +9,7 @@ import Prompt, { type PromptHandle } from './prompt';
 import MatrixCanvas from './matrix-canvas';
 import TopBar from './top-bar';
 import SystemSuspended from './system-suspended';
+import { cn } from '@/lib/utils';
 
 export type Output = {
   id: number;
@@ -80,7 +81,7 @@ const Terminal = () => {
     setCommandInProgress(true);
     addToHistory(command);
 
-    if (trimmedCommand !== 'clear') {
+    if (trimmedCommand !== 'clear' && trimmedCommand !== 'reset' && trimmedCommand !== 'shutdown') {
       addOutput(command, true, `${username}@${hostname}`);
     }
     
@@ -92,11 +93,7 @@ const Terminal = () => {
       addOutput,
       clearOutputs: () => {
         if(trimmedCommand.split(' ')[0] === 'clear') {
-          if (trimmedCommand.split(' ').length > 1) {
-            setOutputs([]);
-          } else {
-            clearAndHeader();
-          }
+          clearAndHeader();
         } else {
            setOutputs([]);
         }
@@ -115,7 +112,7 @@ const Terminal = () => {
     });
     
     if (trimmedCommand !== 'clear' && trimmedCommand !== 'reset' && trimmedCommand !== 'shutdown') {
-      addOutput('', true, `${username}@${hostname}`); // This will be an empty line with a prompt
+        clearAndHeader();
     }
 
     setCommandInProgress(false);
@@ -172,7 +169,7 @@ const Terminal = () => {
       <TopBar />
       <div
         ref={terminalRef}
-        className="h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12"
+        className={cn("h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12 transition-all duration-300", shutdown && 'backdrop-blur-sm')}
         onClick={focusPrompt}
         role="log"
         aria-live="polite"

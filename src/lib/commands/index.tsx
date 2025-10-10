@@ -38,7 +38,7 @@ const showError = (cmd: string, context: CommandContext) => {
 }
 
 export const processCommand = async (context: CommandContext) => {
-    const { command: fullCommand, addOutput, typingSpeed, clearOutputs } = context;
+    const { command: fullCommand, addOutput, typingSpeed } = context;
     const [cmd, ...args] = fullCommand.trim().toLowerCase().split(' ').filter(Boolean);
 
     if (!cmd) {
@@ -46,10 +46,6 @@ export const processCommand = async (context: CommandContext) => {
     }
     
     const handler = commands[cmd];
-
-    if (fullCommand.trim() !== 'clear') {
-        clearOutputs();
-    }
 
     if (!handler) {
         const outputContent = showError(cmd, context);

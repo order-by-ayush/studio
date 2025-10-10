@@ -9,7 +9,7 @@ type SystemSuspendedProps = {
 
 const SystemSuspended = ({ onPowerOn }: SystemSuspendedProps) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full text-center">
+    <div className="fixed inset-0 flex flex-col items-center justify-center h-full w-full text-center">
       <div className="space-y-8">
         <p className="text-2xl">[ SYSTEM SUSPENDED ]</p>
         <div className="text-lg">
