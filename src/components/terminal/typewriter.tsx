@@ -7,12 +7,19 @@ type TypewriterProps = {
   speed?: number;
   className?: string;
   as?: React.ElementType;
+  onFinished?: () => void;
 };
 
-const Typewriter = ({ text, speed = 50, className, as: Component = 'div' }: TypewriterProps) => {
+const Typewriter = ({ text, speed = 50, className, as: Component = 'div', onFinished }: TypewriterProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isFinished, setIsFinished] = useState(false);
   const index = useRef(0);
+  const onFinishedRef = useRef(onFinished);
+
+  // Update the ref if the onFinished prop changes
+  useEffect(() => {
+    onFinishedRef.current = onFinished;
+  }, [onFinished]);
 
   const isMultiLine = useMemo(() => text.includes('\n'), [text]);
 
@@ -39,6 +46,12 @@ const Typewriter = ({ text, speed = 50, className, as: Component = 'div' }: Type
 
     return () => clearInterval(intervalId);
   }, [text, speed]);
+
+  useEffect(() => {
+    if(isFinished && onFinishedRef.current) {
+        onFinishedRef.current();
+    }
+  }, [isFinished]);
 
   const containerStyle = isMultiLine ? { whiteSpace: 'pre-wrap' as 'pre-wrap' } : {};
 
