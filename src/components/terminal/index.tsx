@@ -10,6 +10,7 @@ import MatrixCanvas from './matrix-canvas';
 import TopBar from './top-bar';
 import SystemSuspended from './system-suspended';
 import ShutdownScreen from './shutdown-screen';
+import PowerOnScreen from './power-on-screen';
 import { cn } from '@/lib/utils';
 
 export type Output = {
@@ -30,6 +31,7 @@ const Terminal = () => {
   const [commandInProgress, setCommandInProgress] = useState(false);
   const [shutdown, setShutdown] = useLocalStorage('terminal-shutdown', false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
+  const [isPoweringOn, setIsPoweringOn] = useState(false);
 
   const terminalRef = useRef<HTMLDivElement>(null);
   const promptRef = useRef<PromptHandle>(null);
@@ -81,14 +83,17 @@ const Terminal = () => {
     setShutdown(true);
   };
 
+  const handleStartPowerOn = () => {
+    setIsPoweringOn(true);
+  };
+
+  const handleFinishPowerOn = () => {
+    setIsPoweringOn(false);
+    setShutdown(false);
+  };
+  
   const runCommand = useCallback(async (command: string) => {
     const trimmedCommand = command.trim().toLowerCase();
-    if (trimmedCommand === 'poweron') {
-        setShutdown(false);
-        setIsShuttingDown(false);
-        clearAndHeader();
-        return;
-    }
     
     setCommandInProgress(true);
     addToHistory(command);
@@ -130,7 +135,7 @@ const Terminal = () => {
     if(trimmedCommand !== 'shutdown') {
       setCommandInProgress(false);
     }
-  }, [username, hostname, playSound, addOutput, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, setShutdown, typingSpeed, clearAndHeader]);
+  }, [username, hostname, playSound, addOutput, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, typingSpeed, clearAndHeader]);
   
   const addToHistory = (command: string) => {
     if (command.trim() === '') return;
@@ -164,7 +169,7 @@ const Terminal = () => {
   }, [runCommand, shutdown]);
 
   useEffect(() => {
-    if (!shutdown) {
+    if (!shutdown && !isPoweringOn) {
         if (outputs.length === 0) { // Only add initial messages if outputs are empty
             clearAndHeader();
         }
@@ -172,28 +177,26 @@ const Terminal = () => {
         setOutputs([]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shutdown]);
-
-  const handlePowerOn = () => {
-    runCommand('poweron');
-  };
+  }, [shutdown, isPoweringOn]);
 
   return (
     <>
       <TopBar />
       <div
         ref={terminalRef}
-        className={cn("h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12 transition-all duration-300", (shutdown || isShuttingDown) && 'backdrop-blur-sm')}
+        className={cn("h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12 transition-all duration-300", (shutdown || isShuttingDown || isPoweringOn) && 'backdrop-blur-sm')}
         onClick={focusPrompt}
         role="log"
         aria-live="polite"
       >
         {theme === 'matrix' && !shutdown && !isShuttingDown && <MatrixCanvas />}
         
-        {isShuttingDown ? (
+        {isPoweringOn ? (
+          <PowerOnScreen onFinished={handleFinishPowerOn} />
+        ) : isShuttingDown ? (
           <ShutdownScreen onFinished={handleFinishShutdown} playSound={() => playSound('enter')} />
         ) : shutdown ? (
-          <SystemSuspended onPowerOn={handlePowerOn} />
+          <SystemSuspended onPowerOn={handleStartPowerOn} />
         ) : (
           <>
             {outputs.map((output) => (
