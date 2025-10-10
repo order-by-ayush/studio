@@ -177,7 +177,7 @@ const Terminal = () => {
         setOutputs([]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shutdown, isPoweringOn]);
+  }, [shutdown, isPoweringOn, clearAndHeader]);
 
   return (
     <>
