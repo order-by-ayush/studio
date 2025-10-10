@@ -32,6 +32,12 @@ const Terminal = () => {
   const promptRef = useRef<PromptHandle>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
+  const focusPrompt = useCallback(() => {
+    if (promptRef.current) {
+      promptRef.current.focus();
+    }
+  }, []);
+
   const playSound = useCallback((type: 'enter' | 'error') => {
     if (!soundEnabled || !window.AudioContext) return;
     if (!audioCtxRef.current) {
@@ -100,7 +106,10 @@ const Terminal = () => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [outputs]);
+    if(!commandInProgress) {
+      focusPrompt();
+    }
+  }, [outputs, commandInProgress, focusPrompt]);
 
   useEffect(() => {
     document.body.className = '';
@@ -131,13 +140,6 @@ const Terminal = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shutdown]);
 
-
-  const handleTerminalClick = () => {
-    if (promptRef.current) {
-      promptRef.current.focus();
-    }
-  };
-
   const handlePowerOn = () => {
     runCommand('poweron');
   };
@@ -148,7 +150,7 @@ const Terminal = () => {
       <div
         ref={terminalRef}
         className="h-screen w-full p-4 overflow-y-auto font-mono text-foreground pt-12"
-        onClick={handleTerminalClick}
+        onClick={focusPrompt}
         role="log"
         aria-live="polite"
       >
