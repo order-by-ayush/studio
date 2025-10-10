@@ -84,12 +84,13 @@ const Terminal = () => {
   };
 
   const handleStartPowerOn = () => {
+    setShutdown(false); // Set shutdown to false immediately to trigger the effect
     setIsPoweringOn(true);
   };
 
   const handleFinishPowerOn = () => {
     setIsPoweringOn(false);
-    setShutdown(false);
+    clearAndHeader(); // Explicitly reset the screen
   };
   
   const runCommand = useCallback(async (command: string) => {
@@ -169,15 +170,15 @@ const Terminal = () => {
   }, [runCommand, shutdown]);
 
   useEffect(() => {
-    if (!shutdown && !isPoweringOn) {
-        if (outputs.length === 0) { // Only add initial messages if outputs are empty
+    // This effect handles the initial load and recovery from shutdown
+    if (!shutdown && !isPoweringOn && !isShuttingDown) {
+        if (outputs.length === 0) { 
             clearAndHeader();
         }
-    } else {
+    } else if (shutdown || isShuttingDown) {
         setOutputs([]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shutdown, isPoweringOn, clearAndHeader]);
+  }, [shutdown, isPoweringOn, isShuttingDown, outputs.length, clearAndHeader]);
 
   return (
     <>
