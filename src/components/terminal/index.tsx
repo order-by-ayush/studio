@@ -69,10 +69,11 @@ const Terminal = () => {
   }, []);
 
   const clearAndHeader = useCallback(() => {
-    setOutputs([]);
-    addOutput(<AsciiHeader />);
-    addOutput(`Type '?' or 'help' to view a list of available commands.`);
-  }, [addOutput]);
+    setOutputs([
+      { id: Date.now() + Math.random(), content: <AsciiHeader /> },
+      { id: Date.now() + Math.random() + 1, content: `Type '?' or 'help' to view a list of available commands.` }
+    ]);
+  }, []);
 
   const handleStartShutdown = () => {
     setIsShuttingDown(true);
@@ -90,7 +91,7 @@ const Terminal = () => {
 
   const handleFinishPowerOn = () => {
     setIsPoweringOn(false);
-    clearAndHeader(); // Explicitly reset the screen
+    clearAndHeader(); 
   };
   
   const runCommand = useCallback(async (command: string) => {
@@ -123,7 +124,7 @@ const Terminal = () => {
       setSoundEnabled,
       setTypingSpeed,
       clearHistory: () => setHistory([]),
-      setShutdown: handleStartShutdown, // Triggers the shutdown sequence
+      setShutdown: handleStartShutdown,
       playSound,
       typingSpeed,
       showStartupMessages: clearAndHeader,
@@ -170,15 +171,12 @@ const Terminal = () => {
   }, [runCommand, shutdown]);
 
   useEffect(() => {
-    // This effect handles the initial load and recovery from shutdown
-    if (!shutdown && !isPoweringOn && !isShuttingDown) {
-        if (outputs.length === 0) { 
-            clearAndHeader();
-        }
-    } else if (shutdown || isShuttingDown) {
-        setOutputs([]);
+    if (shutdown) {
+      setOutputs([]);
+    } else if (!isPoweringOn && !isShuttingDown && outputs.length === 0) {
+      clearAndHeader();
     }
-  }, [shutdown, isPoweringOn, isShuttingDown, outputs.length, clearAndHeader]);
+  }, [shutdown, isPoweringOn, isShuttingDown]);
 
   return (
     <>
