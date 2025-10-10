@@ -26,9 +26,14 @@ export const country = async (args: string[]) => {
 
 export const curl = async (args: string[]) => {
   if (!args.length) return 'Usage: curl [url]';
-  const url = args[0];
+  let url = args[0];
+  // Add protocol if missing for server-side fetch
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'https://' + url;
+  }
   const content = await actions.curlUrl(url);
-  return content.length > 2000 ? content.substring(0, 2000) + '... (truncated)' : content;
+  // Show a truncated version if it's too long
+  return content.length > 5000 ? content.substring(0, 5000) + '\n... (truncated)' : content;
 };
 
 export const define = async (args: string[]) => {

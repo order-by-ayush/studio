@@ -4,12 +4,20 @@ import { z } from "zod";
 
 const fetchText = async (url: string) => {
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
     if (!response.ok) {
-      return `Error: Failed to fetch with status ${response.status}`;
+      return `Error: Failed to fetch with status ${response.status} ${response.statusText}`;
     }
     return await response.text();
   } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch failed')) {
+      return `Error: Network request failed. This could be a CORS issue or the domain may not exist.`;
+    }
     return `Error: ${(error as Error).message}`;
   }
 };
@@ -17,14 +25,26 @@ const fetchText = async (url: string) => {
 const fetchJson = async <T>(url: string): Promise<T | { error: string }> => {
   try {
     const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+      headers: { 
+        Accept: "application/json",
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      },
       cache: "no-store",
     });
     if (!response.ok) {
-      return { error: `API request failed with status ${response.status}` };
+      return { error: `API request failed with status ${response.status} ${response.statusText}` };
     }
-    return await response.json();
+    // Handle cases where the response is not JSON
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch(e) {
+        return { error: 'Failed to parse JSON response.'};
+    }
   } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch failed')) {
+      return { error: `Error: Network request failed. This could be a CORS issue or the domain may not exist.`};
+    }
     return { error: `Network error: ${(error as Error).message}` };
   }
 };
@@ -110,8 +130,8 @@ export async function curlUrl(url: string) {
 }
 
 export async function pingUrl(url: string) {
-    const start = performance.now();
     try {
+        const start = performance.now();
         await fetch(url, {method: 'HEAD', cache: 'no-store'});
         const end = performance.now();
         return { time: Math.round(end - start) };
