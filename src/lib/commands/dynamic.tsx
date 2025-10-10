@@ -312,10 +312,58 @@ export const set = async (args: string[], { setTheme, setUsername, setSoundEnabl
     }
 };
 
-export const shutdown = async(args: string[], { setShutdown }) => {
-    setShutdown(true);
-    return "Shutting down... Type 'poweron' to restart.";
+export const shutdown = async (args: string[], { addOutput, setShutdown, playSound, clearOutputs }) => {
+  clearOutputs();
+  const shutdownMessages = `[ OK ] Stopping Network Manager...
+[ OK ] Disconnecting active network interfaces...
+[ OK ] Stopping User Sessions...
+[ OK ] Terminating background services...
+[ OK ] Stopping System Logging...
+[ OK ] Stopping Authorization Manager...
+[ OK ] Saving system clock...
+[ OK ] Unmounting /home...
+[ OK ] Unmounting /var...
+[ OK ] Disabling Swap...
+[ OK ] All file systems unmounted.
+[ OK ] Reached target Shutdown.
+[ *  ] Powering off...
+
+SYSTEM IS GOING TO SLEEP NOW.`;
+
+  // A wrapper to handle the completion of the typewriter effect
+  const TypewriterWrapper = ({ text, onFinished }: { text: string; onFinished: () => void }) => {
+    const [isFinished, setIsFinished] = React.useState(false);
+    const index = React.useRef(0);
+    const [displayedText, setDisplayedText] = React.useState('');
+
+    React.useEffect(() => {
+      const intervalId = setInterval(() => {
+        if (index.current < text.length) {
+          setDisplayedText((prev) => prev + text.charAt(index.current));
+          index.current += 1;
+        } else {
+          clearInterval(intervalId);
+          setIsFinished(true);
+        }
+      }, 50); // medium speed
+      return () => clearInterval(intervalId);
+    }, [text]);
+
+    React.useEffect(() => {
+      if (isFinished) {
+        playSound('enter');
+        setTimeout(onFinished, 500); // Wait a bit before shutting down
+      }
+    }, [isFinished, onFinished]);
+
+    return <pre>{displayedText}</pre>;
+  };
+  
+  return new Promise<React.ReactNode>((resolve) => {
+     resolve(<TypewriterWrapper text={shutdownMessages} onFinished={() => setShutdown(true)} />);
+  });
 };
+
 export const poweron = async(args: string[], context) => {
     // This command is now handled by the UI, but we keep it for compatibility
     context.setShutdown(false);
