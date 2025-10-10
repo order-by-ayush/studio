@@ -88,10 +88,13 @@ export const calendar = async (args: string[]) => {
     if (args.length > 0) {
         const dateString = args.join(' ');
         const parsedDate = new Date(dateString);
+        
+        // Check if the parsed date is valid
         if (!isNaN(parsedDate.getTime())) {
-            // Check if only a year was passed
+             // If user only passes a year, it might be interpreted as month 0.
+             // We want to show an error for this case to guide them.
             if (/^\d{4}$/.test(dateString.trim())) {
-                 return 'Usage: calendar [month year] e.g., calendar september 2025';
+                 return 'Invalid format. Usage: calendar [month year] (e.g., "september 2025") or leave blank.';
             }
             targetDate = parsedDate;
         } else {
@@ -102,27 +105,30 @@ export const calendar = async (args: string[]) => {
     const year = targetDate.getFullYear();
     const month = targetDate.getMonth();
 
-    const firstDay = new Date(year, month, 1).getDay();
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    let result = `   ${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}\n`;
-    result += 'Su Mo Tu We Th Fr Sa\n';
+    let header = `   ${targetDate.toLocaleString('default', { month: 'long' })} ${year}\n`;
+    header += 'Su Mo Tu We Th Fr Sa\n';
 
-    let day = 1;
     let calendarGrid = '';
+    let day = 1;
+
     for(let i=0; i<6; i++){
         let row = '';
         for(let j=0; j<7; j++){
-            if(i === 0 && j < firstDay){
+            if(i === 0 && j < firstDayOfWeek){
                 row += '   ';
             } else if (day > daysInMonth){
                 break;
             } else {
-                if (year === now.getFullYear() && month === now.getMonth() && day === now.getDate()) {
-                    // Highlight current day
-                    row += `\x1b[7m${day.toString().padStart(2, ' ')}\x1b[0m `;
+                let dayStr = day.toString().padStart(2, ' ');
+                // Highlight the current day
+                if (day === now.getDate() && month === now.getMonth() && year === now.getFullYear()) {
+                     // Using basic inversion. For better styling, would need component changes.
+                     row += `\x1b[7m${dayStr}\x1b[0m `;
                 } else {
-                    row += day.toString().padStart(2, ' ') + ' ';
+                    row += `${dayStr} `;
                 }
                 day++;
             }
@@ -131,7 +137,7 @@ export const calendar = async (args: string[]) => {
         if(day > daysInMonth) break;
     }
     
-    return <pre>{result + calendarGrid}</pre>;
+    return <pre>{header + calendarGrid}</pre>;
 };
 
 export const capitalize = async (args: string[]) => {
@@ -410,7 +416,11 @@ const tttCheckWinner = () => {
 
 const tttRenderBoard = () => {
     return <pre className="text-center">
-        {tttBoard[0] || '1'}|{tttBoard[1] || '2'}|{tttBoard[2] || '3'}\n-+-+-\n{tttBoard[3] || '4'}|{tttBoard[4] || '5'}|{tttBoard[5] || '6'}\n-+-+-\n{tttBoard[6] || '7'}|{tttBoard[7] || '8'}|{tttBoard[8] || '9'}
+        {tttBoard[0] || '1'}|{tttBoard[1] || '2'}|{tttBoard[2] || '3'}
+-+-+-
+{tttBoard[3] || '4'}|{tttBoard[4] || '5'}|{tttBoard[5] || '6'}
+-+-+-
+{tttBoard[6] || '7'}|{tttBoard[7] || '8'}|{tttBoard[8] || '9'}
     </pre>;
 }
 export const ttt = async (args: string[], context) => {
@@ -504,3 +514,4 @@ export const whoami = async (args: string[], context) => {
 
     return info.join('\n');
 };
+    
