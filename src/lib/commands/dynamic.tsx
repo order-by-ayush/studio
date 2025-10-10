@@ -137,7 +137,7 @@ export const clear = async (args: string[], { clearOutputs, clearHistory, showSt
     clearHistory();
     return 'History cleared.';
   }
-  return '';
+  // No return value, handled by processCommand
 };
 
 export const coin = async () => (Math.random() < 0.5 ? 'Heads 🪙' : 'Tails 🪙');
@@ -246,7 +246,14 @@ export const reverse = async (args: string[]) => {
 
 let rpsScore = { player: 0, ai: 0 };
 if (typeof window !== 'undefined') {
-    rpsScore = JSON.parse(window.localStorage.getItem('rps-score') || '{"player":0,"ai":0}');
+    const score = window.localStorage.getItem('rps-score');
+    if (score) {
+      try {
+        rpsScore = JSON.parse(score);
+      } catch (e) {
+        rpsScore = { player: 0, ai: 0 };
+      }
+    }
 }
 export const rps = async (args: string[]) => {
     const choices = ['rock', 'paper', 'scissors'];
@@ -312,10 +319,8 @@ export const set = async (args: string[], { setTheme, setUsername, setSoundEnabl
     }
 };
 
-export const shutdown = async (args: string[], { clearOutputs, setShutdown }) => {
-  clearOutputs();
+export const shutdown = async (args: string[], { setShutdown }) => {
   setShutdown(true); // This now triggers the shutdown screen in the UI
-  return ''; // Return nothing, as the UI will handle the display
 };
 
 

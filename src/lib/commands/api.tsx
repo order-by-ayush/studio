@@ -1,6 +1,5 @@
 import React from 'react';
 import * as actions from '@/app/actions';
-import Image from 'next/image';
 import { getDictionaryInfo } from '@/app/actions';
 
 export const antonym = async (args: string[]) => {
@@ -157,21 +156,22 @@ export const weather = async (args: string[], context) => {
     if (!city) {
         // Simple client-side location request
         if(typeof window !== 'undefined' && navigator.geolocation) {
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject);
-            }).catch(err => {
-                context.addOutput(`Could not get your location: ${err.message}. Please specify a city.`);
-                return null;
-            });
-            if (!position) return '';
-            const {latitude, longitude} = position.coords;
-            city = `${latitude},${longitude}`;
+            try {
+                const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+                });
+                const {latitude, longitude} = position.coords;
+                city = `${latitude},${longitude}`;
+            } catch (err: any) {
+                 context.addOutput(`Could not get your location: ${err.message}. Falling back to IP-based location.`);
+                 // Let it fall through to the IP-based lookup
+            }
         } else {
-           return 'Geolocation is not available. Please specify a city. Usage: weather [city]';
+            context.addOutput('Geolocation is not available. Falling back to IP-based location.');
         }
     }
     
-    const data: any = await actions.getWeatherInfo(city);
+    const data: any = await actions.getWeatherInfo(city); // Will use IP if city is empty
     if (data.error) return data.error;
 
     const current = data.current_condition[0];

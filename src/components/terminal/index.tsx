@@ -12,6 +12,7 @@ import SystemSuspended from './system-suspended';
 import ShutdownScreen from './shutdown-screen';
 import PowerOnScreen from './power-on-screen';
 import { cn } from '@/lib/utils';
+import CommandOutput from './command-output';
 
 export type Output = {
   id: number;
@@ -68,7 +69,7 @@ const Terminal = () => {
     setOutputs(prev => [...prev, { id: Date.now() + Math.random(), content, isCommand, command }]);
   }, []);
 
-  const clearAndHeader = useCallback(() => {
+  const showHeader = useCallback(() => {
     setOutputs([
       { id: Date.now() + Math.random(), content: <AsciiHeader /> },
       { id: Date.now() + Math.random() + 1, content: `Type '?' or 'help' to view a list of available commands.` }
@@ -85,39 +86,29 @@ const Terminal = () => {
   };
 
   const handleStartPowerOn = () => {
-    setShutdown(false); // Set shutdown to false immediately to trigger the effect
+    setShutdown(false);
     setIsPoweringOn(true);
   };
 
   const handleFinishPowerOn = () => {
     setIsPoweringOn(false);
-    clearAndHeader(); 
+    showHeader();
   };
   
   const runCommand = useCallback(async (command: string) => {
-    const trimmedCommand = command.trim().toLowerCase();
+    const [cmdName, ...args] = command.trim().split(' ');
     
     setCommandInProgress(true);
     addToHistory(command);
-
-    if (trimmedCommand !== 'clear' && trimmedCommand !== 'reset' && trimmedCommand !== 'shutdown') {
-      addOutput(command, true, `${username}@${hostname}`);
-    }
-    
+    addOutput(command, true, `${username}@${hostname}`);
     playSound('enter');
     
-    await processCommand({
+    const context = {
       command,
       username,
-      addOutput,
-      clearOutputs: () => {
-        if(trimmedCommand.split(' ')[0] === 'clear') {
-          clearAndHeader();
-        } else {
-           setOutputs([]);
-        }
-      },
-      setTheme: (newTheme) => {
+      addOutput: (content: React.ReactNode) => addOutput(<CommandOutput content={content} typingSpeed={typingSpeed} />),
+      clearOutputs: () => setOutputs([]),
+      setTheme: (newTheme: string) => {
         if (isTheme(newTheme)) setTheme(newTheme);
       },
       setUsername,
@@ -127,17 +118,23 @@ const Terminal = () => {
       setShutdown: handleStartShutdown,
       playSound,
       typingSpeed,
-      showStartupMessages: clearAndHeader,
-    });
-    
-    if (trimmedCommand !== 'clear' && trimmedCommand !== 'reset' && trimmedCommand !== 'shutdown') {
-        clearAndHeader();
-    }
+    };
 
-    if(trimmedCommand !== 'shutdown') {
+    await processCommand(cmdName, args, context);
+    
+    // Special handling for commands that manage the screen state
+    if (cmdName.toLowerCase() === 'shutdown') {
+        // State is already handled by setShutdown triggering the effect
+    } else if (cmdName.toLowerCase() === 'clear') {
+       showHeader();
+       setCommandInProgress(false);
+    } else if (cmdName.toLowerCase() === 'reset') {
+        // Let the page reload handle it
+    }
+    else {
       setCommandInProgress(false);
     }
-  }, [username, hostname, playSound, addOutput, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, typingSpeed, clearAndHeader]);
+  }, [username, hostname, playSound, addOutput, typingSpeed, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, showHeader]);
   
   const addToHistory = (command: string) => {
     if (command.trim() === '') return;
@@ -161,22 +158,22 @@ const Terminal = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (shutdown) return;
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'l')) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'l')) {
             e.preventDefault();
-            runCommand('clear');
+            showHeader();
         }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [runCommand, shutdown]);
+  }, [shutdown, showHeader]);
 
   useEffect(() => {
     if (shutdown) {
       setOutputs([]);
     } else if (!isPoweringOn && !isShuttingDown && outputs.length === 0) {
-      clearAndHeader();
+      showHeader();
     }
-  }, [shutdown, isPoweringOn, isShuttingDown]);
+  }, [shutdown, isPoweringOn, isShuttingDown, outputs.length, showHeader]);
 
   return (
     <>

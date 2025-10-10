@@ -2,14 +2,11 @@ import React from 'react';
 import { staticCommands } from './static';
 import * as apiCmds from './api';
 import * as dynamicCmds from './dynamic';
-import { themes, isTheme, Theme } from '@/lib/themes';
-import Typewriter from '@/components/terminal/typewriter';
-import CommandOutput from '@/components/terminal/command-output';
 
 type CommandContext = {
     command: string;
     username: string;
-    addOutput: (content: React.ReactNode, isCommand?: boolean, command?: string) => void;
+    addOutput: (content: React.ReactNode) => void;
     clearOutputs: () => void;
     setTheme: (theme: string) => void;
     setUsername: (username: string) => void;
@@ -22,7 +19,7 @@ type CommandContext = {
     showStartupMessages?: () => void;
 };
 
-type CommandHandler = (args: string[], context: CommandContext) => Promise<React.ReactNode | string>;
+type CommandHandler = (args: string[], context: CommandContext) => Promise<React.ReactNode | string | void>;
 
 const commands: Record<string, CommandHandler> = {
     ...staticCommands,
@@ -30,16 +27,15 @@ const commands: Record<string, CommandHandler> = {
     ...dynamicCmds,
 };
 
-export const commandList = Object.keys(commands);
+export const commandList = Object.keys(commands).filter(c => c !== '?'); // Exclude alias from the main list
 
 const showError = (cmd: string, context: CommandContext) => {
     context.playSound('error');
     return `Command not found: ${cmd}. Type 'help' for a list of commands.`;
 }
 
-export const processCommand = async (context: CommandContext) => {
-    const { command: fullCommand, addOutput, typingSpeed } = context;
-    const [cmd, ...args] = fullCommand.trim().toLowerCase().split(' ').filter(Boolean);
+export const processCommand = async (cmd: string, args: string[], context: CommandContext) => {
+    const { addOutput } = context;
 
     if (!cmd) {
         return;
@@ -49,19 +45,19 @@ export const processCommand = async (context: CommandContext) => {
 
     if (!handler) {
         const outputContent = showError(cmd, context);
-        addOutput(<CommandOutput content={outputContent} typingSpeed={typingSpeed} />);
+        addOutput(outputContent);
         return;
     }
 
     try {
         const outputContent = await handler(args, context);
         if(outputContent) {
-           addOutput(<CommandOutput content={outputContent} typingSpeed={typingSpeed} />);
+           addOutput(outputContent);
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         const outputContent = `Error executing '${cmd}': ${errorMessage}`;
-        addOutput(<CommandOutput content={outputContent} typingSpeed={typingSpeed} />);
+        addOutput(outputContent);
         context.playSound('error');
     }
 };
