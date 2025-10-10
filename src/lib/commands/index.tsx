@@ -54,7 +54,7 @@ export const processCommand = async (cmd: string, args: string[], context: Comma
         return;
     }
     
-    const handler = commands[cmd];
+    const handler = commands[cmd.toLowerCase()];
 
     if (!handler) {
         const outputContent = showError(cmd, context);

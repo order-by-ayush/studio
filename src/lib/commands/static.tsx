@@ -1,6 +1,7 @@
 import React from 'react';
 import { themes } from '@/lib/themes';
 import { commandList } from './index';
+import { manPages } from './manpages';
 
 const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
@@ -33,6 +34,7 @@ const commandDescriptions: Record<string, string> = {
   'ip': 'Get information about an IP address. Usage: ip [address?]',
   'json': 'Fetch and pretty-print JSON from a URL. Usage: json [url]',
   'lowercase': 'Convert text to lowercase. Usage: lowercase [text]',
+  'man': 'Display the manual page for a command. Usage: man [command]',
   'matrix': 'Toggle the matrix animation background.',
   'ping': 'Measure latency to a URL. Usage: ping [url]',
   'projects': 'Display a list of my projects.',
@@ -98,9 +100,51 @@ export const help = async (args: string[]) => {
       <pre>{output}</pre>
       <p className="mt-2">Type 'help [command]' for more details on a specific command.</p>
       <p>Type 'commands' to see a list with descriptions.</p>
+      <p>Type 'man [command]' to see a detailed manual for a command.</p>
     </div>
   );
 };
+
+export const man = async (args: string[]) => {
+  if (args.length === 0) {
+    return 'What manual page do you want?';
+  }
+  const cmd = args[0].toLowerCase();
+  const page = manPages[cmd];
+
+  if (!page) {
+    return `No manual entry for ${cmd}`;
+  }
+
+  return (
+    <div className="space-y-2">
+      <div>
+        <p className="font-bold text-accent">NAME</p>
+        <p className="ml-4">{page.name} - {page.description}</p>
+      </div>
+      <div>
+        <p className="font-bold text-accent">SYNOPSIS</p>
+        <p className="ml-4 font-mono">{page.usage}</p>
+      </div>
+      <div>
+        <p className="font-bold text-accent">DESCRIPTION</p>
+        <p className="ml-4 whitespace-pre-wrap">{page.longDescription}</p>
+      </div>
+      {page.example && (
+         <div>
+          <p className="font-bold text-accent">EXAMPLE</p>
+          <div className="ml-4">
+            <p>The following command:</p>
+            <pre className="p-2 my-1 bg-muted rounded font-mono text-sm">> {page.example.command}</pre>
+            <p>Will produce the following output:</p>
+            <pre className="p-2 my-1 bg-muted rounded font-mono text-sm">{page.example.output}</pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 export const commands = async () => {
     const allCommands = commandList.sort();
@@ -271,5 +315,6 @@ export const staticCommands = {
     projects,
     social,
     theme,
+    man,
     '?': help,
 };
