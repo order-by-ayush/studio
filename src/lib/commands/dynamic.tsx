@@ -83,14 +83,24 @@ export const base64 = async (args: string[]) => {
 
 export const calendar = async (args: string[]) => {
     const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth();
+    let targetDate = now;
 
-    if(args.length > 0){
-        const [m, y] = args[0].split('/');
-        if(y) year = parseInt(y, 10);
-        if(m) month = parseInt(m, 10) - 1;
+    if (args.length > 0) {
+        const dateString = args.join(' ');
+        const parsedDate = new Date(dateString);
+        if (!isNaN(parsedDate.getTime())) {
+            // Check if only a year was passed
+            if (/^\d{4}$/.test(dateString.trim())) {
+                 return 'Usage: calendar [month year] e.g., calendar september 2025';
+            }
+            targetDate = parsedDate;
+        } else {
+            return `Invalid date format: "${dateString}". Try "september 2025" or leave blank for current month.`;
+        }
     }
+
+    const year = targetDate.getFullYear();
+    const month = targetDate.getMonth();
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -108,7 +118,12 @@ export const calendar = async (args: string[]) => {
             } else if (day > daysInMonth){
                 break;
             } else {
-                row += day.toString().padStart(2, ' ') + ' ';
+                if (year === now.getFullYear() && month === now.getMonth() && day === now.getDate()) {
+                    // Highlight current day
+                    row += `\x1b[7m${day.toString().padStart(2, ' ')}\x1b[0m `;
+                } else {
+                    row += day.toString().padStart(2, ' ') + ' ';
+                }
                 day++;
             }
         }
@@ -153,7 +168,7 @@ export const countdays = async (args: string[]) => {
   return `Today is ${args[0]}!`;
 };
 
-export const date = async () => new Date().toLocaleDateString();
+export const date = async () => new Date().toDateString();
 
 export const dice = async (args: string[]) => {
   const sides = args[0] ? parseInt(args[0], 10) : 6;
@@ -339,11 +354,14 @@ export const stopwatch = async (args: string[], context) => {
 };
 
 export const time = async (args: string[]) => {
-    const timezone = args[0];
+    const timezone = args.join(' ');
+    if (!timezone) {
+        return new Date().toLocaleTimeString();
+    }
     try {
         return new Date().toLocaleTimeString('en-US', { timeZone: timezone, hour12: false, hour: '2-digit', minute:'2-digit', second: '2-digit' });
     } catch {
-        return `Invalid timezone: ${timezone}`;
+        return `Invalid timezone: ${timezone}. Try a valid IANA timezone name (e.g., "America/New_York").`;
     }
 };
 
