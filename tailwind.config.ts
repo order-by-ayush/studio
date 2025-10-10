@@ -10,13 +10,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        body: ['Inconsolata', 'monospace'],
+        headline: ['Inconsolata', 'monospace'],
+        code: ['Inconsolata', 'monospace'],
       },
       colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        background: 'hsl(var(--background-hsl))',
+        foreground: 'hsl(var(--foreground-hsl))',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -88,10 +88,14 @@ export default {
             height: '0',
           },
         },
+        blink: {
+          '50%': { opacity: '0' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        blink: 'blink 1s step-end infinite',
       },
     },
   },
