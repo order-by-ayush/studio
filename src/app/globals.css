@@ -35,76 +35,18 @@
     --radius: 0.5rem;
   }
 
-  /* Default hacker theme colors */
-  :root,
-  .theme-hacker {
-    --background-hsl: 0 0% 0%;
-    --foreground-hsl: 0 0% 100%;
-    --accent-hsl: 120 100% 40%;
-    --border-hsl: 120 100% 50%;
-  }
-
   .theme-blood {
     --background-hsl: 0 100% 5%;
     --foreground-hsl: 0 100% 50%;
     --accent-hsl: 0 100% 40%;
     --border-hsl: 0 100% 30%;
   }
-
-  .theme-cobalt {
-    --background-hsl: 240 100% 25%;
-    --foreground-hsl: 197 100% 50%;
-    --accent-hsl: 217 89% 61%;
-    --border-hsl: 240 100% 50%;
-  }
-
-  .theme-corporate {
-    --background-hsl: 0 0% 96%;
-    --foreground-hsl: 0 0% 20%;
-    --accent-hsl: 0 0% 40%;
-    --border-hsl: 0 0% 80%;
-  }
-
-  .theme-cosmic {
-    --background-hsl: 222 47% 7%;
-    --foreground-hsl: 212 100% 66%;
-    --accent-hsl: 265 79% 58%;
-    --border-hsl: 220 14% 13%;
-  }
-
+  
   .theme-dark {
     --background-hsl: 0 0% 0%;
     --foreground-hsl: 0 0% 100%;
     --accent-hsl: 0 0% 50%;
     --border-hsl: 0 0% 20%;
-  }
-
-  .theme-dracula {
-    --background-hsl: 231 15% 18%;
-    --foreground-hsl: 224 71% 94%;
-    --accent-hsl: 326 100% 74%;
-    --border-hsl: 230 17% 44%;
-  }
-
-  .theme-forest {
-    --background-hsl: 120 100% 3%;
-    --foreground-hsl: 120 100% 50%;
-    --accent-hsl: 150 61% 34%;
-    --border-hsl: 120 100% 20%;
-  }
-
-  .theme-gruvbox {
-    --background-hsl: 0 0% 16%;
-    --foreground-hsl: 45 42% 87%;
-    --accent-hsl: 45 93% 58%;
-    --border-hsl: 30 2% 23%;
-  }
-
-  .theme-iceberg {
-    --background-hsl: 240 13% 10%;
-    --foreground-hsl: 0 0% 78%;
-    --accent-hsl: 220 13% 43%;
-    --border-hsl: 240 10% 16%;
   }
 
   .theme-light {
@@ -114,74 +56,18 @@
     --border-hsl: 0 0% 80%;
   }
 
+  .theme-cosmic {
+    --background-hsl: 222 47% 7%;
+    --foreground-hsl: 212 100% 66%;
+    --accent-hsl: 265 79% 58%;
+    --border-hsl: 220 14% 13%;
+  }
+  
   .theme-matrix {
     --background-hsl: 0 0% 0%;
     --foreground-hsl: 120 100% 50%;
     --accent-hsl: 120 100% 33%;
     --border-hsl: 120 100% 50%;
-  }
-
-  .theme-monokai {
-    --background-hsl: 27 10% 10%;
-    --foreground-hsl: 60 70% 94%;
-    --accent-hsl: 342 91% 54%;
-    --border-hsl: 58 11% 40%;
-  }
-
-  .theme-nord {
-    --background-hsl: 220 13% 21%;
-    --foreground-hsl: 222 30% 88%;
-    --accent-hsl: 214 32% 54%;
-    --border-hsl: 220 12% 24%;
-  }
-
-  .theme-pirate {
-    --background-hsl: 0 0% 0%;
-    --foreground-hsl: 51 100% 50%;
-    --accent-hsl: 16 100% 50%;
-    --border-hsl: 0 100% 27%;
-  }
-
-  .theme-pride {
-    --background-hsl: 0 0% 0%;
-    --foreground-hsl: 0 0% 100%;
-    --accent: linear-gradient(90deg, #ff0000, #ff8c00, #ffff00, #008000, #0000ff, #4b0082, #ee82ee);
-    --border-hsl: 0 0% 100%;
-  }
-
-  .theme-retro {
-    --background-hsl: 0 0% 0%;
-    --foreground-hsl: 39 100% 50%;
-    --accent-hsl: 9 100% 64%;
-    --border-hsl: 51 100% 50%;
-  }
-
-  .theme-solarized {
-    --background-hsl: 194 100% 11%;
-    --foreground-hsl: 184 10% 58%;
-    --accent-hsl: 205 68% 51%;
-    --border-hsl: 195 86% 12%;
-  }
-
-  .theme-sunset {
-    --background-hsl: 26 100% 5%;
-    --foreground-hsl: 33 100% 50%;
-    --accent-hsl: 16 100% 50%;
-    --border-hsl: 26 70% 31%;
-  }
-
-  .theme-tokyo {
-    --background-hsl: 222 47% 7%;
-    --foreground-hsl: 210 16% 82%;
-    --accent-hsl: 212 100% 66%;
-    --border-hsl: 216 17% 20%;
-  }
-
-  .theme-ubuntu {
-    --background-hsl: 310 59% 11%;
-    --foreground-hsl: 24 86% 51%;
-    --accent-hsl: 14 78% 44%;
-    --border-hsl: 304 57% 30%;
   }
 
   :root,
