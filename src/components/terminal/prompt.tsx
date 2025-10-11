@@ -18,7 +18,9 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestion, setSuggestion] = useState('');
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLDivElement>(null);
+  const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -26,9 +28,42 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
     },
   }));
 
+  const fetchSuggestions = useCallback(async (partialCommand: string) => {
+    if (!partialCommand) {
+      setAutocompleteSuggestions([]);
+      setSuggestion('');
+      return;
+    }
+    try {
+      const { suggestions } = await fuzzyCommandAutocomplete({
+        partialCommand,
+        availableCommands: commandList,
+      });
+      if (suggestions && suggestions.length > 0) {
+        setSuggestion(suggestions[0]);
+        setAutocompleteSuggestions(suggestions.slice(0, 3));
+      } else {
+        setSuggestion('');
+        setAutocompleteSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      setSuggestion('');
+      setAutocompleteSuggestions([]);
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
-    setInput(e.currentTarget.textContent || '');
-    setSuggestion('');
+    const newText = e.currentTarget.textContent || '';
+    setInput(newText);
+    
+    if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+    }
+    
+    suggestionTimeoutRef.current = setTimeout(() => {
+        fetchSuggestions(newText);
+    }, 150); // debounce requests
   };
 
   const setCursorToEnd = () => {
@@ -36,7 +71,9 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
       const range = document.createRange();
       const sel = window.getSelection();
       if (inputRef.current.childNodes.length > 0) {
-        range.setStart(inputRef.current.childNodes[0], input.length);
+        const textNode = inputRef.current.childNodes[0];
+        // Ensure the range does not exceed the length of the text node
+        range.setStart(textNode, Math.min(input.length, textNode.length));
       } else {
         range.selectNodeContents(inputRef.current);
         range.collapse(false);
@@ -63,6 +100,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
       onSubmit(commandToSubmit);
       setInput('');
       setSuggestion('');
+      setAutocompleteSuggestions([]);
       setHistoryIndex(-1);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -71,6 +109,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
         setHistoryIndex(newIndex);
         setInput(history[newIndex]);
         setSuggestion('');
+        setAutocompleteSuggestions([]);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -79,31 +118,27 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
         setHistoryIndex(newIndex);
         setInput(history[newIndex]);
         setSuggestion('');
+        setAutocompleteSuggestions([]);
       } else if (historyIndex === 0) {
         setHistoryIndex(-1);
         setInput('');
         setSuggestion('');
+        setAutocompleteSuggestions([]);
       }
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (suggestion) {
         setInput(suggestion);
         setSuggestion('');
+        setAutocompleteSuggestions([]);
         setTimeout(setCursorToEnd, 0);
-      } else if (input.trim()) {
-        const { suggestions } = await fuzzyCommandAutocomplete({
-          partialCommand: input,
-          availableCommands: commandList,
-        });
-        if (suggestions && suggestions.length > 0) {
-          setSuggestion(suggestions[0]);
-        }
       }
     } else if (e.key === 'Escape') {
       setInput('');
       setSuggestion('');
-    } else if (e.key.length === 1 || e.key === 'Backspace') {
-      setSuggestion('');
+      setAutocompleteSuggestions([]);
+    } else if (e.key.length !== 1 && e.key !== 'Backspace') {
+       // Not a character key, do nothing with suggestions
     }
   };
 
@@ -114,36 +149,51 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ username, onSubmit, hist
     }
   }, [input]);
 
+  useEffect(() => {
+    return () => {
+        if(suggestionTimeoutRef.current) {
+            clearTimeout(suggestionTimeoutRef.current);
+        }
+    }
+  }, [])
+
   return (
-    <div className="flex w-full items-center" aria-label="Command input">
-      <span className="text-accent shrink-0">{username}:~$</span>
-      <div className="relative flex-grow pl-2">
-        <div
-          ref={inputRef}
-          contentEditable={!disabled}
-          onInput={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="w-full bg-transparent focus:outline-none z-10 relative caret-transparent"
-          aria-label="command-input"
-          autoCapitalize="off"
-          autoCorrect="off"
-          spellCheck="false"
-        />
-        {suggestion && input && (
-          <div className="absolute top-0 left-2 text-muted-foreground pointer-events-none">
-            <span className="text-transparent">{input}</span>
-            <span>{suggestion.substring(input.length)}</span>
-          </div>
+    <div>
+        <div className="flex w-full items-center" aria-label="Command input">
+        <span className="text-accent shrink-0">{username}:~$</span>
+        <div className="relative flex-grow pl-2">
+            <div
+            ref={inputRef}
+            contentEditable={!disabled}
+            onInput={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-transparent focus:outline-none z-10 relative caret-transparent"
+            aria-label="command-input"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck="false"
+            />
+            {suggestion && input && (
+            <div className="absolute top-0 left-2 text-muted-foreground pointer-events-none">
+                <span className="text-transparent">{input}</span>
+                <span>{suggestion.substring(input.length)}</span>
+            </div>
+            )}
+            {!disabled && (
+            <span
+                className="absolute top-0 left-2 pointer-events-none"
+                style={{ transform: `translateX(${input.length}ch)` }}
+            >
+                <span className="cursor-blink bg-foreground w-2 h-[1.2em] inline-block"></span>
+            </span>
+            )}
+        </div>
+        </div>
+        {autocompleteSuggestions.length > 0 && input.trim() && (
+            <div className="pl-2 mt-1 text-muted-foreground text-sm">
+                Suggestions: {autocompleteSuggestions.join(' | ')}
+            </div>
         )}
-        {!disabled && (
-          <span
-            className="absolute top-0 left-2 pointer-events-none"
-            style={{ transform: `translateX(${input.length}ch)` }}
-          >
-            <span className="cursor-blink bg-foreground w-2 h-[1.2em] inline-block"></span>
-          </span>
-        )}
-      </div>
     </div>
   );
 });
