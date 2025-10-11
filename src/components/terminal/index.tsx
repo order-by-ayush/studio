@@ -132,9 +132,7 @@ const Terminal = () => {
       username,
       addOutput: (content: React.ReactNode) => addOutput(<CommandOutput content={content} typingSpeed={typingSpeed} />),
       clearOutputs: () => setOutputs([]),
-      setTheme: (newTheme: string) => {
-        if (isTheme(newTheme)) setTheme(newTheme);
-      },
+      setTheme,
       setUsername,
       setSoundEnabled,
       setTypingSpeed,
