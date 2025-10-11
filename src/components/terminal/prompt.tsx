@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
 import { fuzzyCommandAutocomplete } from '@/ai/flows/fuzzy-command-autocomplete';
 import { commandList } from '@/lib/commands';
+import { cn } from '@/lib/utils';
 
 interface PromptProps {
   promptText: string;
@@ -136,7 +137,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="bg-transparent focus:outline-none z-10 relative w-full"
+            className={cn("bg-transparent focus:outline-none z-10 relative w-full", disabled && 'caret-transparent')}
             aria-label="command-input"
             autoCapitalize="off"
             autoCorrect="off"
@@ -148,12 +149,6 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
                 <span className="text-transparent">{input}</span>
                 <span>{suggestion.substring(input.length)}</span>
             </div>
-            )}
-            {!disabled && (
-              <div className='absolute top-0 left-2 pointer-events-none h-full flex items-center'>
-                 <span className='text-transparent'>{input}</span>
-                 <span className="cursor-blink" />
-              </div>
             )}
         </div>
       </div>

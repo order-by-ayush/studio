@@ -108,34 +108,21 @@
 }
 
 @keyframes blink {
-  50% {
-    opacity: 0;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.cursor-blink {
+/* Use the native caret and style it */
+input {
+  caret-shape: block;
+  caret-color: #0F0;
   animation: blink 1s step-end infinite;
-  background-color: hsl(var(--foreground));
-  display: inline-block;
-  width: 0.6em; /* Width relative to font size */
-  height: 1.2em;  /* Height relative to font size */
-  margin-left: 1px;
-  box-shadow: 0 0 3px hsl(var(--foreground));
-}
-
-
-/* Remove focus outlines for contenteditable divs, but keep them for buttons/links */
-[contenteditable]:focus {
-  outline: none;
-}
-.caret-transparent {
-  caret-color: transparent;
 }
 
 input:focus {
   outline: none;
 }
 
-input {
+.caret-transparent {
   caret-color: transparent;
 }
