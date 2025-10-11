@@ -1,3 +1,4 @@
+
 export type File = {
   type: 'file';
   content: string | (() => string | React.ReactNode);
@@ -15,18 +16,28 @@ export type Directory = {
 export type FileSystemNode = Directory | File;
 
 const aboutContent = `
-Ayush Das - Cybersecurity Enthusiast
-
-I’m Ayush Das, a passionate Cybersecurity Enthusiast and BCA student focused on mastering both Offensive and Defensive Security techniques. My journey in tech began with a deep curiosity for bug hunting, ethical hacking, and OSINT investigations, which gradually evolved into building real-world cybersecurity projects that blend code, creativity, and problem-solving. I thrive on challenges and am constantly seeking opportunities to learn and grow in the ever-evolving field of cybersecurity.
-
----
-## EDUCATION
-- High School | Navjyoti Vidyalaya | 2021 | 84%
-- Higher Secondary | The Dronacharya School | 2023 | 60%
-- Undergraduation (BCA) | YCAT | 2026 | 8.4 SGPA
+## Digital Identity
+- Name: Ayush Das
+- Headline: Cybersecurity Enthusiast
+- Location: Odisha, India
+- Short Bio: I protect systems and data from cyber threats.
+- Long Bio: I’m Ayush Das, a passionate Cybersecurity Enthusiast and BCA student focused on mastering both Offensive and Defensive Security techniques. My journey in tech began with a deep curiosity for bug hunting, ethical hacking, and OSINT investigations, which gradually evolved into building real-world cybersecurity projects that blend code, creativity, and problem-solving. I thrive on challenges and am constantly seeking opportunities to learn and grow in the ever-evolving field of cybersecurity.
 
 ---
-## KEY SKILLS
+## Education
+- **Undergraduation (BCA)** | YCAT | 2026 | 8.4 SGPA
+- **Higher Secondary** | The Dronacharya School | 2023 | 60%
+- **High School** | Navjyoti Vidyalaya | 2021 | 84%
+
+---
+## Certifications & Courses
+- Cyber Job Simulation by Deloitte
+- ANZ Cyber Security Management
+- Tata Cybersecurity Analyst Completion Certificate
+- Mastercard Cybersecurity Completion Certificate
+
+---
+## Key Skills
 - Languages: Java, C, C++, Python, HTML, CSS, JS, React, PHP
 - Platforms: Linux, AWS
 - Tools: Git/GitHub, API Development
@@ -35,24 +46,20 @@ I’m Ayush Das, a passionate Cybersecurity Enthusiast and BCA student focused o
 const projectsContent = `
 Here are the highlights of some of my projects. You can find more on my GitHub.
 
-1. **Packet Sniffer based on Java**
-   Developed a network packet sniffer in Java to capture, analyze, and display real-time network traffic, aiding in network monitoring and security analysis.
+**Packet Sniffer based on Java**
+Developed a network packet sniffer in Java to capture, analyze, and display real-time network traffic, aiding in network monitoring and security analysis.
 
-2. **Online Odisha eCommerce website**
-   Designed and developed an e-commerce platform focused on selling traditional and locally-made clothing in Odisha.
-   [Link: https://github.com/aayush-xid-su/ewebsite]
+**Online Odisha eCommerce website**
+Designed and developed an e-commerce platform focused on selling traditional and locally-made clothing in Odisha, supporting regional artisans and promoting traditional fashion through a user-friendly online store.
 
-3. **Chess based encryption–decryption (C4Crypt)**
-   A web-based encryption tool that converts text into chess move sequences using a custom cipher algorithm.
-   [Link: https://github.com/aayush-xid-su/C4Crypt]
+**HTTP Server for Wireless File Transfer**
+Built a lightweight HTTP server to enable remote file transfer over a network without cables, allowing seamless sharing between devices using only a web browser.
 
-4. **Deck of card encryption–decryption (CardCrypt)**
-   A web-based encryption tool that encodes messages using a card-based cipher mechanism.
-   [Link: https://github.com/aayush-xid-su/CardCrypt]
+**Image Encryption & Decryption Tool**
+Created a secure tool to encrypt and decrypt images using custom algorithms, ensuring data privacy and protection during storage and transfer.
 
-5. **HTTP Server for Wireless File Transfer**
-   Built a lightweight HTTP server to enable remote file transfer over a network without cables.
-   [Link: https://github.com/aayush-xid-su/http-server]
+**Global Health Expenditure Analysis using Power BI**
+Analyzed global health spending trends using data visualization and statistical methods to highlight disparities and support policy insights.
 
 ---
 You can view more projects on my GitHub profile: https://github.com/aayush-xid-su
@@ -158,9 +165,25 @@ prankFolders.forEach(folderName => {
 
 // Function to find a node by path
 export const findNode = (path: string, startNode: Directory = root): FileSystemNode | undefined => {
-    const parts = path.split('/').filter(p => p && p !== '~' && p !== '.');
+    let effectivePath = path;
     let currentNode: Directory = startNode;
 
+    if (path.startsWith('~/')) {
+        const homeNode = findNode('home/aayush', root);
+        if (homeNode && homeNode.type === 'directory') {
+            currentNode = homeNode;
+            effectivePath = path.substring(2);
+        } else {
+            return undefined; // Home directory not found
+        }
+    } else if (path === '~') {
+         const homeNode = findNode('home/aayush', root);
+         return homeNode && homeNode.type === 'directory' ? homeNode : undefined;
+    }
+
+
+    const parts = effectivePath.split('/').filter(p => p && p !== '.');
+    
     for (const part of parts) {
         if (part === '..') {
             if (currentNode.parent) {
@@ -185,21 +208,23 @@ export const findNode = (path: string, startNode: Directory = root): FileSystemN
     return currentNode;
 };
 
+
 export const getPath = (node: Directory): string => {
-    if (node === findNode('home/aayush')) return '~/';
+    if (node === findNode('home/aayush')) return '~';
     if (node === root) return '/';
     
-    let path = '';
+    let pathParts: string[] = [];
     let current: Directory | null = node;
     while (current && current.parent) {
-        path = `/${current.name}${path}`;
+        pathParts.unshift(current.name);
         current = current.parent;
     }
-    
-    const homePath = '/home/aayush';
-    if (path.startsWith(homePath)) {
-        return `~${path.substring(homePath.length)}/` || '~/';
-    }
 
-    return path || '/';
+    const homeNode = findNode('home/aayush') as Directory;
+    if (node === homeNode || pathParts.join('/').startsWith('home/aayush')) {
+        const relativePath = pathParts.slice(2).join('/');
+        return `~/${relativePath}`;
+    }
+    
+    return `/${pathParts.join('/')}`;
 };
