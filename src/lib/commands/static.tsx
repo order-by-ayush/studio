@@ -62,7 +62,7 @@ export const commandDescriptions: Record<string, string> = {
 export const help = async () => {
   const allCommands = commandList.sort();
   const maxLength = Math.max(...allCommands.map(cmd => cmd.length)) + 2; // a little extra padding
-  const numColumns = 6;
+  const numColumns = 8;
   const numRows = Math.ceil(allCommands.length / numColumns);
   let output = 'Available commands:\n';
   const columns: string[][] = Array(numColumns).fill(0).map(() => []);
