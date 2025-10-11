@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
-import { fuzzyCommandAutocomplete } from '@/ai/flows/fuzzy-command-autocomplete';
-import { commandList } from '@/lib/commands';
+import { fuzzyCommandAutocomplete, FuzzyAutocompleteOutput } from '@/ai/flows/fuzzy-command-autocomplete';
+import { commandDescriptions } from '@/lib/commands/static';
 import { cn } from '@/lib/utils';
 
 interface PromptProps {
@@ -17,9 +17,9 @@ export interface PromptHandle {
 
 const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, history, disabled }, ref) => {
   const [input, setInput] = useState('');
-  const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestion, setSuggestion] = useState('');
-  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<FuzzyAutocompleteOutput['suggestions']>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -38,10 +38,10 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     try {
       const { suggestions } = await fuzzyCommandAutocomplete({
         partialCommand,
-        availableCommands: commandList,
+        availableCommands: commandDescriptions,
       });
       if (suggestions && suggestions.length > 0) {
-        setSuggestion(suggestions[0]);
+        setSuggestion(suggestions[0].command);
         setAutocompleteSuggestions(suggestions.slice(0, 3));
       } else {
         setSuggestion('');
@@ -137,7 +137,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className={cn("bg-transparent focus:outline-none z-10 relative w-full", disabled && 'caret-transparent')}
+            className={cn("bg-transparent focus:outline-none z-10 relative w-full", disabled ? 'caret-transparent' : '')}
             aria-label="command-input"
             autoCapitalize="off"
             autoCorrect="off"
@@ -154,7 +154,10 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
       </div>
       {autocompleteSuggestions.length > 0 && input.trim() && (
           <div className="pl-2 mt-1 text-muted-foreground text-sm">
-              Suggestions: {autocompleteSuggestions.join(' | ')}
+              <div>Suggestions:</div>
+              {autocompleteSuggestions.map(s => (
+                  <div key={s.command}>- {s.command}: {s.description}</div>
+              ))}
           </div>
       )}
     </div>

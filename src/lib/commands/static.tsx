@@ -4,7 +4,7 @@ import { commandList } from './index';
 import { manPages } from './manpages';
 import { findNode, root } from '@/lib/filesystem';
 
-const commandDescriptions: Record<string, string> = {
+export const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
   'help': 'Show available commands or details for a specific command. Usage: help [command]',
   'ayush': 'Opens my personal portfolio website in a new tab.',
@@ -47,7 +47,7 @@ const commandDescriptions: Record<string, string> = {
   'social': 'Display links to my social media profiles.',
   'stopwatch': 'A simple stopwatch. Usage: stopwatch [start|stop|reset]',
   'sysinfo': 'Displays detailed system and IP information.',
-  'theme': 'List available themes.',
+  'theme': 'List available themes. Use "set theme <name>" to change.',
   'time': 'Display the current time or time in a specific timezone. Usage: time [timezone?]',
   'timer': 'Set a countdown timer. Usage: timer [seconds|hh:mm:ss]',
   'uptime': 'Show terminal session uptime.',
@@ -55,6 +55,8 @@ const commandDescriptions: Record<string, string> = {
   'uuid': 'Generate a random UUID.',
   'weather': 'Show weather for your location or a city. Usage: weather [city?]',
   'whoami': 'Display current user and system info.',
+  'about': 'Displays my biography, education, and skills.',
+  'projects': 'Showcase of my key projects.'
 };
 
 export const help = async () => {
