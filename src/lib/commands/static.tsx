@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { themes } from '@/lib/themes';
+import { isTheme, themes } from '@/lib/themes';
 import { commandList } from './index';
 import { manPages } from './manpages';
 
@@ -54,7 +55,7 @@ const commandDescriptions: Record<string, string> = {
   'stopwatch': 'A simple stopwatch. Usage: stopwatch [start|stop|reset]',
   'synonym': 'Find synonyms for a word. Usage: synonym [word]',
   'sysinfo': 'Displays detailed system and IP information.',
-  'theme': 'List all available themes.',
+  'theme': 'List available themes or set a theme. Usage: theme [theme-name?]',
   'time': 'Display the current time or time in a specific timezone. Usage: time [timezone?]',
   'timer': 'Set a countdown timer. Usage: timer [seconds|hh:mm:ss]',
   'translate': 'Translate text to another language. Usage: translate [text] [to_lang?]',
@@ -314,13 +315,23 @@ export const social = async (args: string[]) => {
     )
 };
 
-export const theme = async () => {
+export const theme = async (args: string[], { setTheme }) => {
+    if (args.length > 0) {
+        const selectedTheme = args[0];
+        if (isTheme(selectedTheme)) {
+            setTheme(selectedTheme);
+            return `Theme set to ${selectedTheme}.`;
+        }
+        return `Invalid theme. Available: ${themes.join(', ')}`;
+    }
+
     return (
         <div>
             <p>Available themes:</p>
             <ul className="list-disc list-inside grid grid-cols-3 gap-x-4">
                 {themes.map(t => <li key={t}>{t}</li>)}
             </ul>
+            <p className="mt-2">Usage: theme [theme-name]</p>
         </div>
     );
 };
