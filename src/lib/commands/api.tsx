@@ -84,7 +84,7 @@ export const github = async (args: string[]) => {
     return (
         <div className="flex items-start gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.avatar_url} alt={`${data.login}'s avatar`} className="w-20 h-20 rounded-md" />
+            <img src={data.avatar_url} alt={`${data.login}'s avatar`} className="w-16 h-16 rounded-md" />
             <div className="space-y-1">
                 <p className="text-lg font-bold">{data.name} (@{data.login})</p>
                 <p>Member since: {joinDate}</p>
