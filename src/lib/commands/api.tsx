@@ -2,19 +2,6 @@ import React from 'react';
 import * as actions from '@/app/actions';
 import { getDictionaryInfo } from '@/app/actions';
 
-export const antonym = async (args: string[]) => {
-  if (!args.length) return 'Usage: antonym [word]';
-  const word = args[0];
-  const data = await getDictionaryInfo(word);
-  if (data.error) return data.error;
-
-  const antonyms = data.meanings?.flatMap((m: any) => m.antonyms).filter(Boolean);
-  if (!antonyms || antonyms.length === 0) {
-    return `No antonyms found for "${word}".`;
-  }
-  return `Antonyms for ${word}: ${antonyms.join(', ')}`;
-};
-
 export const country = async (args: string[]) => {
   let name = args.join(' ');
   if (!name) {
@@ -43,20 +30,6 @@ export const curl = (args: string[], context) => {
   actions.curlUrl(url).then(content => {
     context.addOutput(<pre className="whitespace-pre-wrap">{content}</pre>);
   });
-};
-
-export const define = async (args: string[]) => {
-  if (!args.length) return 'Usage: define [word]';
-  const word = args[0];
-  const data = await actions.getDictionaryInfo(word);
-  if (data.error) return data.error;
-
-  const phonetics = data.phonetics?.find((p: any) => p.text)?.text;
-  const meanings = data.meanings?.map((m: any, i: number) => 
-    `\n${i+1}. (${m.partOfSpeech}) ${m.definitions[0].definition}`
-  ).join('');
-
-  return `Definition of ${word} ${phonetics ? `(${phonetics})` : ''}:${meanings}`;
 };
 
 export const dns = async (args: string[]) => {
@@ -134,53 +107,11 @@ export const ping = async (args: string[]) => {
     return `Pong! Response from ${url} in ${result.time}ms`;
 };
 
-export const quote = async () => {
-    const data: any = await actions.getQuote();
-    if(data.error) return data.error;
-    return `"${data.content}"\n- ${data.author}`;
-};
-
 export const shorten = async (args: string[]) => {
     if (!args.length) return 'Usage: shorten [url]';
     const url = args[0];
     const shortUrl = await actions.getShortenedUrl(url);
     return `Shortened URL: ${shortUrl}`;
-};
-
-export const stock = async (args: string[]) => {
-    if(!args.length) return 'Usage: stock [ticker]';
-    const ticker = args[0];
-    const data: any = await actions.getStockInfo(ticker);
-    const quote = data?.['Global Quote'];
-    if(!quote || Object.keys(quote).length === 0) return `Could not find stock data for ticker: ${ticker}`;
-    const price = parseFloat(quote['05. price']).toFixed(2);
-    const change = parseFloat(quote['09. change']).toFixed(2);
-    const changePercent = parseFloat(quote['10. change percent']).toFixed(2);
-
-    return `${quote['01. symbol']}: $${price} | Change: $${change} (${changePercent}%)`;
-};
-
-export const synonym = async (args: string[]) => {
-  if (!args.length) return 'Usage: synonym [word]';
-  const word = args[0];
-  const data = await getDictionaryInfo(word);
-  if (data.error) return data.error;
-
-  const synonyms = data.meanings?.flatMap((m: any) => m.synonyms).filter(Boolean);
-  if (!synonyms || synonyms.length === 0) {
-    return `No synonyms found for "${word}".`;
-  }
-  return `Synonyms for ${word}: ${synonyms.join(', ')}`;
-};
-
-export const translate = async (args: string[]) => {
-    if (args.length < 1) return 'Usage: translate [text] [to_lang?]';
-    const to = args.length > 1 ? args[args.length - 1] : 'es';
-    const text = args.length > 1 ? args.slice(0, -1).join(' ') : args.join(' ');
-
-    const data: any = await actions.getTranslatedText(text, to);
-    if(data.error) return data.error;
-    return data.translatedText;
 };
 
 export const weather = async (args: string[], context) => {

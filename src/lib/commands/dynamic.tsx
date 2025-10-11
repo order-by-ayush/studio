@@ -138,11 +138,6 @@ export const calendar = async (args: string[]) => {
     return <pre>{header + calendarGrid}</pre>;
 };
 
-export const capitalize = async (args: string[]) => {
-  if (!args.length) return 'Usage: capitalize [text]';
-  return args.join(' ').replace(/\b\w/g, l => l.toUpperCase());
-};
-
 export const clear = async (args: string[], { clearOutputs, clearHistory, showStartupMessages }) => {
   const mode = args[0] || 'screen';
   if (mode === 'screen') {
@@ -181,13 +176,6 @@ export const dice = async (args: string[]) => {
   return `Rolled a ${sides}-sided die: ${roll} 🎲`;
 };
 
-export const emoji = async (args: string[]) => {
-    const emojiMap: Record<string, string> = {'smile': '😊', 'sad': '😢', 'wink': '😉', 'heart': '❤️'};
-    const name = args[0];
-    if(!name) return `Usage: emoji [name]. Try: ${Object.keys(emojiMap).join(', ')}`;
-    return emojiMap[name] || `Emoji not found: ${name}`;
-};
-
 export const hash = async (args: string[]) => {
     if(!args.length) return "Usage: hash [text]";
     if(typeof window === 'undefined' || !window.crypto?.subtle) return "Crypto API not available.";
@@ -206,11 +194,6 @@ export const history = async (args: string[], context) => {
     const history = JSON.parse(historyStr);
     const count = args[0] ? parseInt(args[0], 10) : 10;
     return history.slice(0, count).reverse().join('\n');
-};
-
-export const lowercase = async (args: string[]) => {
-  if (!args.length) return 'Usage: lowercase [text]';
-  return args.join(' ').toLowerCase();
 };
 
 export const matrix = async (args: string[], { setMatrix }) => {
@@ -250,11 +233,6 @@ export const reset = async (args: string[], { setShutdown }) => {
         window.location.reload();
     }
     return "Resetting terminal...";
-};
-
-export const reverse = async (args: string[]) => {
-  if (!args.length) return 'Usage: reverse [text]';
-  return args.join(' ').split('').reverse().join('');
 };
 
 let rpsScore = { player: 0, ai: 0 };
@@ -414,61 +392,6 @@ export const timer = async (args: string[], context) => {
     return `Timer set for ${totalSeconds} seconds.`;
 };
 
-let tttBoard = ['','','','','','','','',''];
-let tttPlayer = 'X';
-const tttCheckWinner = () => {
-    const lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ];
-    for(let i=0; i<lines.length; i++){
-        const [a,b,c] = lines[i];
-        if(tttBoard[a] && tttBoard[a] === tttBoard[b] && tttBoard[a] === tttBoard[c]) return tttBoard[a];
-    }
-    return tttBoard.includes('') ? null : 'Tie';
-}
-
-const tttRenderBoard = () => {
-    return <pre className="text-center">
-        {tttBoard[0] || '1'}|{tttBoard[1] || '2'}|{tttBoard[2] || '3'}
--+-+-
-{tttBoard[3] || '4'}|{tttBoard[4] || '5'}|{tttBoard[5] || '6'}
--+-+-
-{tttBoard[6] || '7'}|{tttBoard[7] || '8'}|{tttBoard[8] || '9'}
-    </pre>;
-}
-export const ttt = async (args: string[], context) => {
-    if (args[0] === 'reset') {
-        tttBoard = ['','','','','','','','',''];
-        tttPlayer = 'X';
-        return <div>New game started. Player X's turn.{tttRenderBoard()}</div>;
-    }
-    const winner = tttCheckWinner();
-    if(winner) return `Game over. ${winner === 'Tie' ? "It's a tie" : `${winner} wins!`}. Type 'ttt reset' to play again.`;
-
-    // Player's move
-    const pos = parseInt(args[0], 10) - 1;
-    if (isNaN(pos) || pos < 0 || pos > 8 || tttBoard[pos]) {
-        return <div>Invalid move. Player {tttPlayer}'s turn. Choose an empty spot (1-9).{tttRenderBoard()}</div>;
-    }
-    tttBoard[pos] = tttPlayer;
-    if(tttCheckWinner()) return <div>Player {tttPlayer} wins!{tttRenderBoard()}</div>;
-
-    // AI's move
-    const emptySpots = tttBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-    if(emptySpots.length > 0) {
-        const aiMove = emptySpots[Math.floor(Math.random() * emptySpots.length)]!;
-        tttBoard[aiMove] = 'O';
-    }
-    
-    if(tttCheckWinner()) return <div>Player O wins!{tttRenderBoard()}</div>;
-    if(!tttBoard.includes('')) return <div>It's a tie!{tttRenderBoard()}</div>
-
-    return <div>Player {tttPlayer}'s turn. {tttRenderBoard()}</div>;
-};
-
-export const uppercase = async (args: string[]) => {
-  if (!args.length) return 'Usage: uppercase [text]';
-  return args.join(' ').toUpperCase();
-};
-
 let sessionStartTime = Date.now();
 if (typeof window !== 'undefined' && window.sessionStorage.getItem('session-start-time')) {
     sessionStartTime = parseInt(window.sessionStorage.getItem('session-start-time')!, 10);
@@ -526,4 +449,3 @@ export const whoami = async (args: string[], context) => {
     return info.join('\n');
 };
     
-
