@@ -7,24 +7,24 @@ import { useEffect, useState } from 'react';
 const BOOT_CHOICE_KEY = 'boot_choice';
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const savedChoice = sessionStorage.getItem(BOOT_CHOICE_KEY);
     if (savedChoice === 'it-guy') {
       setShowTerminal(true);
     }
-    setLoading(false);
   }, []);
 
   const handleSelectItGuy = () => {
     sessionStorage.setItem(BOOT_CHOICE_KEY, 'it-guy');
     setShowTerminal(true);
   };
-
-  if (loading) {
-    return null; // Don't render anything until client-side check is complete
+  
+  if (!isClient) {
+    return null; // Don't render anything on the server to avoid hydration errors.
   }
 
   return (
