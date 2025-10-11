@@ -72,7 +72,6 @@ export const sysinfo = async () => {
         'Time Zone (IP)': ipData.timezone || 'N/A',
         'Org': ipData.org || 'N/A',
         'ASN': ipData.as || 'N/A',
-        'VPN/Proxy': 'N/A',
     };
 
     return (

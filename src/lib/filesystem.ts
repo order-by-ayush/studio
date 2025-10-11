@@ -165,23 +165,24 @@ prankFolders.forEach(folderName => {
 
 // Function to find a node by path
 export const findNode = (path: string, startNode: Directory = root): FileSystemNode | undefined => {
-    let effectivePath = path;
-    let currentNode: Directory = startNode;
+    let currentNode: Directory;
+    let effectivePath: string;
 
     if (path.startsWith('~/')) {
-        const homeNode = findNode('home/aayush', root);
-        if (homeNode && homeNode.type === 'directory') {
-            currentNode = homeNode;
-            effectivePath = path.substring(2);
-        } else {
-            return undefined; // Home directory not found
-        }
+        currentNode = findNode('home/aayush', root) as Directory;
+        effectivePath = path.substring(2);
     } else if (path === '~') {
-         const homeNode = findNode('home/aayush', root);
-         return homeNode && homeNode.type === 'directory' ? homeNode : undefined;
+        return findNode('home/aayush', root);
+    } else if (path.startsWith('/')) {
+        currentNode = root;
+        effectivePath = path.substring(1);
+    } else {
+        currentNode = startNode;
+        effectivePath = path;
     }
 
-
+    if (effectivePath === '') return currentNode;
+    
     const parts = effectivePath.split('/').filter(p => p && p !== '.');
     
     for (const part of parts) {
@@ -210,20 +211,40 @@ export const findNode = (path: string, startNode: Directory = root): FileSystemN
 
 
 export const getPath = (node: Directory): string => {
-    if (node === findNode('home/aayush')) return '~';
+    const homeNode = findNode('home/aayush', root);
+    if (node === homeNode) return '~';
     if (node === root) return '/';
     
     let pathParts: string[] = [];
     let current: Directory | null = node;
+
+    // Check if the current node is a descendant of the home directory
+    let isDescendantOfHome = false;
+    let temp: Directory | null = node;
+    while(temp && temp.parent) {
+        if (temp.parent === homeNode) {
+            isDescendantOfHome = true;
+            break;
+        }
+        temp = temp.parent;
+    }
+
+    if (isDescendantOfHome) {
+        pathParts = [];
+        current = node;
+        while(current && current !== homeNode) {
+            pathParts.unshift(current.name);
+            current = current.parent;
+        }
+        return `~/${pathParts.join('/')}`;
+    }
+    
+    // Otherwise, build the absolute path from root
+    pathParts = [];
+    current = node;
     while (current && current.parent) {
         pathParts.unshift(current.name);
         current = current.parent;
-    }
-
-    const homeNode = findNode('home/aayush') as Directory;
-    if (node === homeNode || pathParts.join('/').startsWith('home/aayush')) {
-        const relativePath = pathParts.slice(2).join('/');
-        return `~/${relativePath}`;
     }
     
     return `/${pathParts.join('/')}`;

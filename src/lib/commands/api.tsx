@@ -1,5 +1,6 @@
 import React from 'react';
 import * as actions from '@/app/actions';
+import { CommandContext } from '.';
 
 export const country = async (args: string[]) => {
   let name = args.join(' ');
@@ -17,7 +18,7 @@ export const country = async (args: string[]) => {
   return `Country: ${data.name.common}\nCapital: ${data.capital?.[0]}\nPopulation: ${data.population.toLocaleString()}\nRegion: ${data.region}\nCurrencies: ${currencyInfo}`;
 };
 
-export const curl = (args: string[], context) => {
+export const curl = async (args: string[], context: CommandContext) => {
   if (!args.length) {
     context.addOutput('Usage: curl [url]');
     return;
@@ -26,9 +27,8 @@ export const curl = (args: string[], context) => {
   if (!/^https?:\/\//i.test(url)) {
     url = 'https://' + url;
   }
-  actions.curlUrl(url).then(content => {
-    context.addOutput(<pre className="whitespace-pre-wrap">{content}</pre>);
-  });
+  const content = await actions.curlUrl(url);
+  context.addOutput(<pre className="whitespace-pre-wrap">{content}</pre>);
 };
 
 export const dns = async (args: string[]) => {
@@ -135,28 +135,29 @@ export const shorten = async (args: string[]) => {
     return `Shortened URL: ${shortUrl}`;
 };
 
-export const weather = async (args: string[], context) => {
+export const weather = async (args: string[], context: CommandContext) => {
     let city: string | undefined = args.join(' ');
 
     if (!city) {
-        // Simple client-side location request
-        if(typeof window !== 'undefined' && navigator.geolocation) {
+        if (typeof window !== 'undefined' && navigator.geolocation) {
             try {
                 const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
                 });
-                const {latitude, longitude} = position.coords;
+                const { latitude, longitude } = position.coords;
                 city = `${latitude},${longitude}`;
             } catch (err: any) {
-                 context.addOutput(`Could not get your location: ${err.message}. Falling back to IP-based location.`);
-                 // Let it fall through to the IP-based lookup
+                context.addOutput(`Could not get your location: ${err.message}. Falling back to IP-based location.`);
+                // Let it fall through to the IP-based lookup by leaving city empty
+                city = '';
             }
         } else {
             context.addOutput('Geolocation is not available. Falling back to IP-based location.');
+            city = '';
         }
     }
-    
-    const data: any = await actions.getWeatherInfo(city); // Will use IP if city is empty
+
+    const data: any = await actions.getWeatherInfo(city);
     if (data.error) return data.error;
 
     const current = data.current_condition[0];

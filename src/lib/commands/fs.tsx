@@ -1,6 +1,6 @@
 import React from 'react';
 import { CommandContext } from './index';
-import { Directory, FileSystemNode, findNode, getPath, root } from '@/lib/filesystem';
+import { Directory, findNode, getPath, root } from '@/lib/filesystem';
 
 const prankFolders = ['admin', 'bin', 'etc', 'root', 'usr'];
 const homeDir = findNode('home/aayush') as Directory;
@@ -33,12 +33,9 @@ export const cd = async (args: string[], { currentDirectory, setCurrentDirectory
         }
         return;
     }
-    
-    const newPath = path.startsWith('/') ? path.substring(1) : (currentPath === '/' ? path : `${currentDirectory.name ? getPath(currentDirectory) + '/' : ''}${path}`);
-    const resolvedPath = path.startsWith('~/') ? `home/aayush/${path.substring(2)}` : newPath;
 
-    const newNode = findNode(resolvedPath, root);
-    
+    const newNode = findNode(path, currentDirectory);
+
     if (newNode && newNode.type === 'directory') {
         if (prankFolders.includes(newNode.name) && newNode.parent === root) {
              playSound('error');
@@ -96,14 +93,19 @@ export const cat = async (args: string[], { currentDirectory }: CommandContext) 
     }
     
     if (typeof node.content === 'function') {
-        return node.content();
+        const content = node.content();
+        return <pre className="whitespace-pre-wrap">{content}</pre>;
     }
 
     return <pre className="whitespace-pre-wrap">{node.content}</pre>;
 };
 
 export const pwd = async (args: string[], { currentPath }: CommandContext) => {
-    if (currentPath === '~/') return '/home/aayush';
-    if (currentPath === '/') return '/';
-    return currentPath.replace(/^~\//, '/home/aayush/');
+    if (currentPath.startsWith('~/')) {
+        return `/home/aayush${currentPath.substring(1)}`;
+    }
+    if (currentPath === '~') {
+        return '/home/aayush';
+    }
+    return currentPath;
 };
