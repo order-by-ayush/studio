@@ -254,7 +254,7 @@ export const projects = async () => {
                 <p>Here are the highlight of some my projects</p>
                 <p>you can find more on my github [<a href="https://github.com/aayush-xid-su" target="_blank" rel="noopener noreferrer" className="text-accent underline">https://github.com/aayush-xid-su</a>]</p>
             </div>
-            <ol className="list-decimal list-inside space-y-3">
+            <ol className="list-decimal list-inside space-y-4">
                 <li>
                     <p><span className="font-bold">Packet Sniffer based on Java</span></p>
                     <p>Developed a network packet sniffer in Java to capture, analyze, and display real-time network traffic, aiding in network monitoring and security analysis.</p>
