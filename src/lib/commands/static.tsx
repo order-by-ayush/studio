@@ -2,6 +2,7 @@ import React from 'react';
 import { isTheme, themes } from '@/lib/themes';
 import { commandList } from './index';
 import { manPages } from './manpages';
+import { findNode, root } from '@/lib/filesystem';
 
 const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
@@ -93,7 +94,8 @@ export const help = async (args: string[]) => {
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
       <div className="mt-2">
-        <p>Use `ls` to see available folders. Navigate with `cd`.</p>
+        <p>This terminal has a virtual file system. Use `ls`, `cd`, and `cat` to explore.</p>
+        <p>Available folders: home, admin, bin, etc, usr, root</p>
       </div>
     </div>
   );
@@ -163,8 +165,19 @@ export const ayush = async () => {
     return 'Opening portfolio...';
 };
 
-export const about = async (args: string[], context: any) => {
-    return context.runCommand('cat', ['about.md']);
+const getFileContent = (path: string) => {
+    const node = findNode(path, root);
+    if (node && node.type === 'file') {
+        if (typeof node.content === 'function') {
+            return node.content();
+        }
+        return <pre className="whitespace-pre-wrap">{node.content}</pre>;
+    }
+    return `Error: File not found at ${path}`;
+}
+
+export const about = async () => {
+    return getFileContent('home/aayush/about.md');
 };
 
 
@@ -179,8 +192,8 @@ export const contact = async () => {
   );
 };
 
-export const projects = async (args: string[], context: any) => {
-    return context.runCommand('cat', ['projects.md']);
+export const projects = async () => {
+    return getFileContent('home/aayush/projects.md');
 };
 
 export const social = async (args: string[]) => {
