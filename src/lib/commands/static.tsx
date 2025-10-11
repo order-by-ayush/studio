@@ -6,11 +6,11 @@ import { findNode, root } from '@/lib/filesystem';
 
 export const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
-  'help': 'Show available commands or details for a specific command. Usage: help [command]',
-  'ayush': 'Opens my personal portfolio website in a new tab.',
+  'about': 'Displays my biography, education, and skills.',
   'age': 'Calculate age from a given date. Usage: age YYYY-MM-DD',
   'ascii': 'Convert text to ASCII art. Usage: ascii [text] [font?]',
   'asciiqr': 'Generate an ASCII QR code from text. Usage: asciiqr [text]',
+  'ayush': 'Opens my personal portfolio website in a new tab.',
   'base64': 'Encode or decode text using Base64. Usage: base64 [encode|decode] [text]',
   'calendar': 'Display a calendar for the current month or a specified month/year. Usage: calendar [month year?]',
   'cat': 'Display content of a file. Usage: cat [filename]',
@@ -29,6 +29,7 @@ export const commandDescriptions: Record<string, string> = {
   'geo': 'Get address from latitude and longitude. Usage: geo [lat,lon]',
   'github': 'Show GitHub profile information. Usage: github [username?]',
   'hash': 'Generate a SHA-256 hash of a text. Usage: hash [text]',
+  'help': 'Show available commands or details for a specific command. Usage: help [command]',
   'history': 'Show command history. Usage: history [count?]',
   'ip': 'Get information about an IP address. Usage: ip [address?]',
   'json': 'Fetch and pretty-print JSON from a URL. Usage: json [url]',
@@ -36,6 +37,8 @@ export const commandDescriptions: Record<string, string> = {
   'man': 'Display the manual page for a command. Usage: man [command]',
   'matrix': 'Toggle the matrix animation background.',
   'ping': 'Measure latency to a URL. Usage: ping [url]',
+  'poweron': 'Restarts the terminal.',
+  'projects': 'Showcase of my key projects.',
   'pwd': 'Print working directory.',
   'qr': 'Generate a QR code image from text. Usage: qr [text]',
   'remind': 'Set a reminder. Usage: remind [seconds] [message]',
@@ -56,8 +59,6 @@ export const commandDescriptions: Record<string, string> = {
   'uuid': 'Generate a random UUID.',
   'weather': 'Show weather for your location or a city. Usage: weather [city?]',
   'whoami': 'Display current user and system info.',
-  'about': 'Displays my biography, education, and skills.',
-  'projects': 'Showcase of my key projects.'
 };
 
 export const help = async (args: string[]) => {
@@ -173,11 +174,11 @@ export const ayush = async () => {
     return 'Opening portfolio...';
 };
 
-const getFileContent = (path: string) => {
+const getFileContent = async (path: string) => {
     const node = findNode(path, root);
     if (node && node.type === 'file') {
         if (typeof node.content === 'function') {
-            return (node.content as () => React.ReactNode)();
+            return await Promise.resolve(node.content());
         }
         return <pre className="whitespace-pre-wrap">{node.content}</pre>;
     }
