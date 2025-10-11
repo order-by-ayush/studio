@@ -37,9 +37,12 @@
 
   .theme-blood {
     --background: 0 0% 0%;
-    --foreground: 0 100% 90%;
+    --foreground: 0 100% 80%;
     --accent: 0 100% 40%;
     --border: 0 100% 30%;
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 100% 10%;
+    color-scheme: dark;
   }
   
   .theme-dark {
@@ -47,6 +50,9 @@
     --foreground: 0 0% 100%;
     --accent: 0 0% 50%;
     --border: 0 0% 20%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    color-scheme: dark;
   }
 
   .theme-light {
@@ -54,6 +60,9 @@
     --foreground: 0 0% 0%;
     --accent: 0 0% 20%;
     --border: 0 0% 80%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    color-scheme: light;
   }
 
   .theme-cosmic {
@@ -61,6 +70,9 @@
     --foreground: 212 100% 66%;
     --accent: 265 79% 58%;
     --border: 220 14% 13%;
+    --primary: 212 100% 76%;
+    --primary-foreground: 222 47% 7%;
+    color-scheme: dark;
   }
   
   .theme-matrix {
@@ -68,25 +80,8 @@
     --foreground: 120 100% 50%;
     --accent: 120 100% 33%;
     --border: 120 100% 50%;
-  }
-
-  body {
-    --background-hsl: var(--background);
-    --foreground-hsl: var(--foreground);
-    --primary-hsl: var(--foreground);
-    --primary-foreground-hsl: var(--background);
-    --accent-hsl: var(--accent);
-    --border-hsl: var(--border);
-    --input-hsl: var(--border);
-    --ring-hsl: var(--accent);
-    --card-hsl: var(--background);
-    --card-foreground-hsl: var(--foreground);
-    --popover-hsl: var(--background);
-    --popover-foreground-hsl: var(--foreground);
-    --secondary-hsl: hsl(var(--accent) / 0.2);
-    --secondary-foreground-hsl: var(--foreground);
-    --muted-hsl: hsl(var(--accent) / 0.2);
-    --muted-foreground-hsl: hsl(var(--foreground) / 0.7);
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
     color-scheme: dark;
   }
 
