@@ -82,7 +82,7 @@ export const cat = async (args: string[], { currentDirectory }: CommandContext) 
         return 'Usage: cat [filename]';
     }
 
-    const node = currentDirectory.children[filename];
+    const node = findNode(filename, currentDirectory);
 
     if (!node) {
         return `cat: ${filename}: No such file or directory`;
@@ -93,7 +93,7 @@ export const cat = async (args: string[], { currentDirectory }: CommandContext) 
     }
     
     if (typeof node.content === 'function') {
-        const content = node.content();
+        const content = await Promise.resolve(node.content());
         return <pre className="whitespace-pre-wrap">{content}</pre>;
     }
 

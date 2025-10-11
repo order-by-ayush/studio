@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 const inconsolata = Inconsolata({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "Ayush Das's Terminal Portfolio",
-  description: 'Interactive CLI portfolio of Ayush Das. Type "help" to get started.',
+  title: "Ayush Das - Terminal Portfolio",
+  description: "An interactive terminal-based portfolio for Ayush Das, showcasing projects, skills, and more.",
   openGraph: {
-    title: "Ayush Das's Terminal Portfolio",
+    title: "Ayush Das - Terminal Portfolio",
     description: 'An interactive terminal-based portfolio showcasing projects, skills, and more.',
     type: 'website',
   },

@@ -155,7 +155,7 @@ const Terminal = () => {
     }
     
     setCommandInProgress(false);
-  }, [username, playSound, addOutput, typingSpeed, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, showHeader, currentDirectory, currentPath, getPromptText]);
+  }, [getPromptText, playSound, addOutput, typingSpeed, setTheme, setUsername, setSoundEnabled, setTypingSpeed, setHistory, showHeader, currentDirectory, currentPath]);
   
   const addToHistory = (command: string) => {
     if (command.trim() === '') return;
@@ -250,7 +250,7 @@ const Terminal = () => {
               <div key={output.id} className="output-line mb-2">
                 {output.isCommand ? (
                   <div className="flex">
-                    <span className="text-green-500">{output.promptText}</span>
+                    <span className="text-primary">{output.promptText}</span>
                     <span className="flex-1 pl-2">{output.content}</span>
                   </div>
                 ) : (

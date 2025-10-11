@@ -139,22 +139,22 @@ export const weather = async (args: string[], context: CommandContext) => {
     let city: string | undefined = args.join(' ');
 
     if (!city) {
-        if (typeof window !== 'undefined' && navigator.geolocation) {
-            try {
-                const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-                });
-                const { latitude, longitude } = position.coords;
-                city = `${latitude},${longitude}`;
-            } catch (err: any) {
-                context.addOutput(`Could not get your location: ${err.message}. Falling back to IP-based location.`);
-                // Let it fall through to the IP-based lookup by leaving city empty
-                city = '';
-            }
-        } else {
-            context.addOutput('Geolocation is not available. Falling back to IP-based location.');
-            city = '';
+      if (typeof window !== 'undefined' && navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          const { latitude, longitude } = position.coords;
+          city = `${latitude},${longitude}`;
+        } catch (err: any) {
+          context.addOutput(`Geolocation permission denied or failed. Falling back to IP-based location.`);
+          // Let it fall through to the IP-based lookup by leaving city empty
+          city = '';
         }
+      } else {
+        context.addOutput('Geolocation is not available. Falling back to IP-based location.');
+        city = '';
+      }
     }
 
     const data: any = await actions.getWeatherInfo(city);

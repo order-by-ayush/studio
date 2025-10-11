@@ -129,7 +129,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
   return (
     <div>
       <div className="flex w-full items-center" aria-label="Command input" onClick={() => inputRef.current?.focus()}>
-        <span className="text-green-500 shrink-0">{promptText}</span>
+        <span className="text-primary shrink-0">{promptText}</span>
         <div className="relative flex-grow pl-2 flex items-center">
             <input
             ref={inputRef}

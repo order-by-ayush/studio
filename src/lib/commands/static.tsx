@@ -40,12 +40,13 @@ export const commandDescriptions: Record<string, string> = {
   'qr': 'Generate a QR code image from text. Usage: qr [text]',
   'remind': 'Set a reminder. Usage: remind [seconds] [message]',
   'reset': 'Reset terminal settings and reload.',
+  'resume': 'Displays my resume.',
   'rps': 'Play Rock, Paper, Scissors. Usage: rps [rock|paper|scissors]',
   'set': 'Configure terminal options. Usage: set <option> [value]',
   'shorten': 'Shorten a URL using TinyURL. Usage: shorten [url]',
   'shutdown': 'Shuts down the terminal interface.',
   'social': 'Display links to my social media profiles.',
-  'stopwatch': 'A simple stopwatch. Usage: stopwatch [start|stop|reset]',
+  'stopwatch': 'A simple stopwatch. Usage: stopwatch [start|stop]',
   'sysinfo': 'Displays detailed system and IP information.',
   'theme': 'List available themes. Use "set theme <name>" to change.',
   'time': 'Display the current time or time in a specific timezone. Usage: time [timezone?]',
@@ -59,31 +60,44 @@ export const commandDescriptions: Record<string, string> = {
   'projects': 'Showcase of my key projects.'
 };
 
-export const help = async () => {
+export const help = async (args: string[]) => {
+  if (args.length > 0) {
+    const cmd = args[0].toLowerCase();
+    if (commandDescriptions[cmd]) {
+      return `Usage: ${commandDescriptions[cmd]}`;
+    }
+    return `Command not found: ${cmd}`;
+  }
+
   const allCommands = commandList.sort();
-  const maxLength = Math.max(...allCommands.map(cmd => cmd.length)) + 2; // a little extra padding
+  const maxLength = 12;
   const numColumns = 8;
   const numRows = Math.ceil(allCommands.length / numColumns);
   let output = 'Available commands:\n';
   const columns: string[][] = Array(numColumns).fill(0).map(() => []);
 
   for (let i = 0; i < allCommands.length; i++) {
-    columns[Math.floor(i / numRows)].push(allCommands[i]);
+    columns[i % numColumns].push(allCommands[i]);
   }
 
+  const flattened = columns.reduce((acc, val) => acc.concat(val), []);
+  
+  let resultGrid = '';
   for (let i = 0; i < numRows; i++) {
     let row = '';
     for (let j = 0; j < numColumns; j++) {
-      if (columns[j][i]) {
-        row += columns[j][i].padEnd(maxLength);
+      const index = j * numRows + i;
+      if (flattened[index]) {
+         row += flattened[index].padEnd(maxLength);
       }
     }
-    output += row + '\n';
+    resultGrid += row + '\n';
   }
-  
+
+
   return (
     <div>
-      <pre className="whitespace-pre-wrap">{output}</pre>
+      <pre className="whitespace-pre-wrap">{resultGrid}</pre>
       <p className="mt-2">Type 'help [command]' for more details on a specific command.</p>
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
@@ -163,7 +177,7 @@ const getFileContent = (path: string) => {
     const node = findNode(path, root);
     if (node && node.type === 'file') {
         if (typeof node.content === 'function') {
-            return node.content();
+            return (node.content as () => React.ReactNode)();
         }
         return <pre className="whitespace-pre-wrap">{node.content}</pre>;
     }
@@ -174,6 +188,9 @@ export const about = async () => {
     return getFileContent('home/aayush/about.md');
 };
 
+export const resume = async () => {
+    return getFileContent('home/aayush/resume.md');
+};
 
 export const contact = async () => {
   return (
@@ -239,6 +256,7 @@ export const staticCommands = {
     about,
     contact,
     projects,
+    resume,
     social,
     theme,
     man,

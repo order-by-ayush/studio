@@ -1,7 +1,8 @@
+import React from 'react';
 
 export type File = {
   type: 'file';
-  content: string | (() => string | React.ReactNode);
+  content: string | (() => React.ReactNode);
   name: string;
   parent: Directory;
 };
@@ -43,8 +44,7 @@ const aboutContent = `
 - Tools: Git/GitHub, API Development
 `;
 
-const projectsContent = `
-Projects :
+const projectsContent = `Projects :
 Here are the highlight of some my projects
 you can find more on my github [ https://github.com/aayush-xid-su ]
 

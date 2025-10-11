@@ -339,12 +339,29 @@ export const stopwatch = async (args: string[], context: CommandContext) => {
     const op = args[0] || 'start';
     if (op === 'start') {
         context.setStopwatch(prev => {
-            if(prev.running) return prev;
+            if(prev.running) {
+                context.addOutput('Stopwatch is already running.');
+                return prev;
+            }
             return { running: true, startTime: Date.now(), elapsed: 0 }
         });
         return 'Stopwatch started... Press ESC to stop.';
+    } else if (op === 'stop') {
+        let finalTime = 0;
+        context.setStopwatch(prev => {
+            if(!prev.running) {
+                context.addOutput('Stopwatch is not running.');
+                return prev;
+            }
+            finalTime = (Date.now() - prev.startTime);
+            return { running: false, startTime: 0, elapsed: 0 };
+        });
+         if (finalTime > 0) {
+            return `Stopwatch stopped. Final time: ${(finalTime / 1000).toFixed(2)}s`;
+        }
+        return '';
     }
-    return 'Usage: stopwatch start';
+    return 'Usage: stopwatch [start|stop]';
 };
 
 export const time = async (args: string[]) => {
