@@ -115,7 +115,13 @@
 
 .cursor-blink {
   animation: blink 1s step-end infinite;
+  background-color: hsl(var(--foreground));
+  display: inline-block;
+  width: 0.5rem;
+  height: 1.2em;
+  margin-left: 0.25rem;
 }
+
 
 /* Remove focus outlines for contenteditable divs, but keep them for buttons/links */
 [contenteditable]:focus {
@@ -123,4 +129,12 @@
 }
 .caret-transparent {
   caret-color: transparent;
+}
+
+input:focus {
+  outline: none;
+}
+
+input {
+  caret-color: hsl(var(--foreground));
 }

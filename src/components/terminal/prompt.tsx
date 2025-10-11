@@ -19,7 +19,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestion, setSuggestion] = useState('');
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -53,8 +53,8 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
-    const newText = e.currentTarget.textContent || '';
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newText = e.currentTarget.value || '';
     setInput(newText);
     
     if (suggestionTimeoutRef.current) {
@@ -66,26 +66,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     }, 150); // debounce requests
   };
 
-  const setCursorToEnd = () => {
-    if (inputRef.current) {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      if (inputRef.current.childNodes.length > 0) {
-        const textNode = inputRef.current.childNodes[0];
-        // Ensure the range does not exceed the length of the text node
-        range.setStart(textNode, Math.min(input.length, textNode.length));
-      } else {
-        range.selectNodeContents(inputRef.current);
-        range.collapse(false);
-      }
-      range.collapse(true);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-    }
-  };
-
-
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (disabled) {
       e.preventDefault();
       return;
@@ -93,11 +74,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     
     if (e.key === 'Enter') {
       e.preventDefault();
-      let commandToSubmit = input;
-      // Use the full suggestion if tab hasn't been pressed but there's a suggestion.
-      if (suggestion && input.trim() !== '') {
-        commandToSubmit = suggestion;
-      }
+      const commandToSubmit = suggestion && input.trim() !== '' ? suggestion : input;
       onSubmit(commandToSubmit);
       setInput('');
       setSuggestion('');
@@ -132,23 +109,13 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
         setInput(suggestion);
         setSuggestion('');
         setAutocompleteSuggestions([]);
-        setTimeout(setCursorToEnd, 0);
       }
     } else if (e.key === 'Escape') {
       setInput('');
       setSuggestion('');
       setAutocompleteSuggestions([]);
-    } else if (e.key.length !== 1 && e.key !== 'Backspace') {
-       // Not a character key, do nothing with suggestions
     }
   };
-
-  useEffect(() => {
-    if (inputRef.current && inputRef.current.textContent !== input) {
-      inputRef.current.textContent = input;
-      setCursorToEnd();
-    }
-  }, [input]);
 
   useEffect(() => {
     return () => {
@@ -160,36 +127,31 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
 
   return (
     <div>
-        <div className="flex w-full items-center" aria-label="Command input">
-        <span className="text-green-500 shrink-0">{promptText}</span>
-        <div className="relative flex-grow pl-2">
-            <div
-            ref={inputRef}
-            contentEditable={!disabled}
-            onInput={handleInputChange}
-            onKeyDown={handleKeyDown}
-            className="w-full bg-transparent focus:outline-none z-10 relative caret-transparent"
-            aria-label="command-input"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck="false"
+        <div className="relative flex w-full items-center" aria-label="Command input">
+          <span className="text-green-500 shrink-0">{promptText}</span>
+          <div className="relative flex-grow pl-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              className="w-full bg-transparent focus:outline-none z-10 relative"
+              aria-label="command-input"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
+              disabled={disabled}
             />
             {suggestion && input && (
-            <div className="absolute top-0 left-2 text-muted-foreground pointer-events-none">
-                <span className="text-transparent">{input}</span>
-                <span>{suggestion.substring(input.length)}</span>
-            </div>
+              <div className="absolute top-0 left-2 text-muted-foreground pointer-events-none">
+                  <span className="text-transparent">{input}</span>
+                  <span>{suggestion.substring(input.length)}</span>
+              </div>
             )}
-            {!disabled && (
-            <span
-                className="absolute top-0 left-2 pointer-events-none"
-                style={{ transform: `translateX(${input.length}ch)` }}
-            >
-                <span className="cursor-blink bg-foreground w-2 h-[1.2em] inline-block"></span>
-            </span>
-            )}
+            {!disabled && <span className="cursor-blink" />}
         </div>
-        </div>
+      </div>
         {autocompleteSuggestions.length > 0 && input.trim() && (
             <div className="pl-2 mt-1 text-muted-foreground text-sm">
                 Suggestions: {autocompleteSuggestions.join(' | ')}
