@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { isTheme, themes } from '@/lib/themes';
 import { commandList } from './index';
@@ -349,5 +347,3 @@ export const staticCommands = {
     man,
     '?': help,
 };
-
-    
