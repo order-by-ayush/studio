@@ -6,8 +6,11 @@ import React, { useEffect, useState } from 'react';
 const TopBar = () => {
     const [weather, setWeather] = useState('Fetching weather...');
     const [currentTime, setCurrentTime] = useState('');
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        setIsClient(true);
+
         const fetchUserWeather = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
@@ -66,7 +69,7 @@ const TopBar = () => {
                 <a href="https://www.github.com/aayush-xid-su" target="_blank" rel="noopener noreferrer">https://www.github.com/aayush-xid-su</a>
             </div>
             <div className="flex items-center gap-2">
-                <span>{currentTime}</span>
+                <span>{isClient ? currentTime : ''}</span>
                 <button onClick={toggleFullscreen} className="focus:outline-none">
                     <Maximize size={16} />
                 </button>

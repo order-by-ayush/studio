@@ -347,15 +347,30 @@ export const stopwatch = async (args: string[], context) => {
 };
 
 export const time = async (args: string[]) => {
-    const timezone = args.join(' ');
-    if (!timezone) {
-        return new Date().toLocaleTimeString();
+    const formatArg = args.find(arg => arg.startsWith('--'));
+    const timezone = args.filter(arg => !arg.startsWith('--')).join(' ');
+
+    let options: Intl.DateTimeFormatOptions = {
+        hour: '2-digit',
+        minute:'2-digit',
+        second: '2-digit',
+    };
+
+    if(formatArg === '--12') {
+        options.hour12 = true;
+    } else if (formatArg === '--24') {
+        options.hour12 = false;
     }
-    try {
-        return new Date().toLocaleTimeString('en-US', { timeZone: timezone, hour12: false, hour: '2-digit', minute:'2-digit', second: '2-digit' });
-    } catch {
-        return `Invalid timezone: ${timezone}. Try a valid IANA timezone name (e.g., "America/New_York").`;
+
+    if (timezone) {
+        try {
+            options.timeZone = timezone;
+            return new Date().toLocaleTimeString('en-US', options);
+        } catch {
+            return `Invalid timezone: ${timezone}. Try a valid IANA timezone name (e.g., "America/New_York").`;
+        }
     }
+    return new Date().toLocaleTimeString(undefined, options);
 };
 
 let countdownInterval: NodeJS.Timeout | null = null;
