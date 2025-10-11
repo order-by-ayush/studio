@@ -13,7 +13,7 @@ import ShutdownScreen from './shutdown-screen';
 import PowerOnScreen from './power-on-screen';
 import { cn } from '@/lib/utils';
 import CommandOutput from './command-output';
-import { Directory, findNode } from '@/lib/filesystem';
+import { Directory, root } from '@/lib/filesystem';
 
 export type Output = {
   id: number;
@@ -48,10 +48,8 @@ const Terminal = () => {
   const [matrix, setMatrix] = useState<MatrixState>({ active: false, color: '#0F0' });
   const [stopwatch, setStopwatch] = useState<StopwatchState>({ running: false, startTime: 0, elapsed: 0 });
   
-  // Initialize to ~/aayush
-  const initialDir = findNode('home/aayush') as Directory;
-  const [currentDirectory, setCurrentDirectory] = useState<Directory>(initialDir);
-  const [currentPath, setCurrentPath] = useState<string>('~/');
+  const [currentDirectory, setCurrentDirectory] = useState<Directory>(root);
+  const [currentPath, setCurrentPath] = useState<string>('/');
 
 
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -285,3 +283,5 @@ const Terminal = () => {
 };
 
 export default Terminal;
+
+    

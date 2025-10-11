@@ -93,15 +93,7 @@ export const help = async (args: string[]) => {
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
       <div className="mt-2">
-        <p>Available folders:</p>
-        <div className="grid grid-cols-4 gap-x-2 text-blue-400">
-            <span>aayush/</span>
-            <span>admin/</span>
-            <span>bin/</span>
-            <span>etc/</span>
-            <span>root/</span>
-            <span>usr/</span>
-        </div>
+        <p>Use `ls` to see available folders. Navigate with `cd`.</p>
       </div>
     </div>
   );
@@ -254,3 +246,5 @@ export const staticCommands = {
     man,
     '?': help,
 };
+
+    
