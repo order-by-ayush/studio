@@ -161,7 +161,7 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
   return (
     <div>
         <div className="flex w-full items-center" aria-label="Command input">
-        <span className="text-accent shrink-0">{promptText}</span>
+        <span className="text-green-500 shrink-0">{promptText}</span>
         <div className="relative flex-grow pl-2">
             <div
             ref={inputRef}
