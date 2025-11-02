@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { isTheme, themes } from 'lib/themes';
+import { isTheme, themes } from '../themes';
 import { commandList } from './index';
 import { manPages } from './manpages';
-import { findNode, root } from 'lib/filesystem';
+import { findNode, root } from '../filesystem';
 
 export const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
@@ -73,34 +72,13 @@ export const help = async (args: string[]) => {
   }
 
   const allCommands = commandList.sort();
-  const maxLength = 12;
-  const numColumns = 8;
-  const numRows = Math.ceil(allCommands.length / numColumns);
-  let output = 'Available commands:\n';
-  const columns: string[][] = Array(numColumns).fill(0).map(() => []);
-
-  for (let i = 0; i < allCommands.length; i++) {
-    columns[i % numColumns].push(allCommands[i]);
-  }
-
-  const flattened = columns.reduce((acc, val) => acc.concat(val), []);
   
-  let resultGrid = '';
-  for (let i = 0; i < numRows; i++) {
-    let row = '';
-    for (let j = 0; j < numColumns; j++) {
-      const index = j * numRows + i;
-      if (flattened[index]) {
-         row += flattened[index].padEnd(maxLength);
-      }
-    }
-    resultGrid += row + '\n';
-  }
-
-
   return (
     <div>
-      <pre className="whitespace-pre-wrap">{resultGrid}</pre>
+      <p>Available commands:</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-1 my-2">
+        {allCommands.map(cmd => <span key={cmd}>{cmd}</span>)}
+      </div>
       <p className="mt-2">Type 'help [command]' for more details on a specific command.</p>
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
@@ -154,12 +132,13 @@ export const man = async (args: string[]) => {
 
 
 export const commands = async () => {
-    const allCommands = commandList.sort();
+    const allCommands = Object.keys(commandDescriptions).sort();
     const maxLength = Math.max(...allCommands.map(cmd => cmd.length));
     const commandDetails = allCommands.map(cmd => {
+      if (cmd === '?') return null; // Don't show alias in this list
       const description = commandDescriptions[cmd]?.split('.')[0] || 'No description available.';
       return `${cmd.padEnd(maxLength + 4)}${description}`;
-    }).join('\n');
+    }).filter(Boolean).join('\n');
     
     return (
         <div>
@@ -243,7 +222,7 @@ export const theme = async () => {
     return (
         <div>
             <p>Available themes:</p>
-            <ul className="list-disc list-inside grid grid-cols-3 gap-x-4">
+            <ul className="list-disc list-inside grid grid-cols-2 md:grid-cols-3 gap-x-4">
                 {themes.map(t => <li key={t}>{t}</li>)}
             </ul>
             <p className="mt-2">Usage: set theme [theme-name]</p>

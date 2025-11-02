@@ -1,4 +1,3 @@
-
 'use client';
 
 import { cn } from 'lib/utils';
@@ -40,10 +39,10 @@ const BootMenu = ({ onSelectItGuy }: BootMenuProps) => {
 
   return (
     <div className="fixed inset-0 bg-black text-primary font-mono flex flex-col items-center justify-center p-4">
-      <div className="border border-primary rounded-lg p-8 w-full max-w-lg space-y-6">
-        <h1 className="text-2xl">Boot Menu</h1>
+      <div className="border border-primary rounded-lg p-4 md:p-8 w-full max-w-lg space-y-4 md:space-y-6">
+        <h1 className="text-xl md:text-2xl">Boot Menu</h1>
         <p>Select your profile to continue:</p>
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
           <button
             onClick={() => {
               setSelected('it-guy');
@@ -51,7 +50,7 @@ const BootMenu = ({ onSelectItGuy }: BootMenuProps) => {
             }}
             onMouseEnter={() => setSelected('it-guy')}
             className={cn(
-              'border border-primary rounded px-6 py-3 flex items-center gap-2 transition-colors duration-200',
+              'border border-primary rounded px-4 py-2 md:px-6 md:py-3 flex items-center gap-2 transition-colors duration-200 w-full md:w-auto justify-center',
               selected === 'it-guy' ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/20'
             )}
           >
@@ -66,7 +65,7 @@ const BootMenu = ({ onSelectItGuy }: BootMenuProps) => {
             }}
             onMouseEnter={() => setSelected('normal-user')}
             className={cn(
-              'border border-primary rounded px-6 py-3 flex items-center gap-2 transition-colors duration-200',
+              'border border-primary rounded px-4 py-2 md:px-6 md:py-3 flex items-center gap-2 transition-colors duration-200 w-full md:w-auto justify-center',
                selected === 'normal-user' ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/20'
             )}
           >

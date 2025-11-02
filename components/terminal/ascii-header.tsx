@@ -2,19 +2,21 @@ import React from 'react';
 
 const AsciiHeader = () => {
     const logoArt = `
-    _    _   _  _ __  _   _ 
-   / \\  | | | || '__|| | | |
-  / _ \\ | |_| || |   | |_| |
- / ___ \\|  _  || |   |  _  |
-/_/   \\_\\_| |_||_|   |_| |_|
+ █████╗ ██╗   ██╗██╗   ██╗███████╗██╗  ██╗
+██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██║  ██║
+███████║ ╚████╔╝ ██║   ██║███████╗███████║
+██╔══██║  ╚██╔╝  ██║   ██║╚════██║██╔══██║
+██║  ██║   ██║   ╚██████╔╝███████║██║  ██║
+╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝
+
 `;
 
     return (
         <div>
-            <pre className="text-foreground text-xs md:text-sm">
+            <pre className="text-foreground text-[0.5rem] leading-tight md:text-sm md:leading-normal">
                 {logoArt}
             </pre>
-            <p>Welcome to Ayush Das's Terminal</p>
+            <p>Welcome to Ayush's Terminal</p>
         </div>
     );
 };
