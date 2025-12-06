@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { isTheme, themes } from '../themes';
 import { commandList } from './index';
@@ -62,6 +63,15 @@ export const commandDescriptions: Record<string, string> = {
   whoami: 'Display current user and system info.',
 };
 
+const CommandSection = ({ title, commands }: { title: string, commands: string[] }) => (
+    <div className="mb-2">
+        <p className="text-accent font-bold">{title}:</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-1">
+            {commands.sort().map(cmd => <span key={cmd}>{cmd}</span>)}
+        </div>
+    </div>
+);
+
 export const help = async (args: string[]) => {
   if (args.length > 0) {
     const cmd = args[0].toLowerCase();
@@ -71,14 +81,22 @@ export const help = async (args: string[]) => {
     return `Command not found: ${cmd}`;
   }
 
-  const allCommands = commandList.sort();
+  const commandCategories = {
+    Terminal: ['about', 'ayush', 'contact', 'projects', 'resume', 'social'],
+    System: ['calendar', 'country', 'date', 'ping', 'reset', 'set', 'sysinfo', 'time', 'uptime', 'username', 'uuid', 'weather', 'whoami'],
+    Interact: ['age', 'ascii', 'asciiqr', 'coin', 'countdays', 'dice', 'matrix', 'qr', 'remind', 'rps', 'shorten', 'stopwatch', 'theme', 'timer'],
+    Encrypt: ['base64', 'hash'],
+    Info: ['curl', 'dns', 'dnslookup', 'geo', 'github', 'ip', 'json'],
+    Boot: ['poweron', 'shutdown'],
+    Other: ['ai', 'cat', 'cd', 'clear', 'commands', 'help', 'history', 'ls', 'man', 'pwd'],
+  };
   
   return (
     <div>
-      <p>Available commands:</p>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-1 my-2">
-        {allCommands.map(cmd => <span key={cmd}>{cmd}</span>)}
-      </div>
+        <p className="mb-2">Available commands:</p>
+        {Object.entries(commandCategories).map(([title, commands]) => (
+            <CommandSection key={title} title={title} commands={commands} />
+        ))}
       <p className="mt-2">Type 'help [command]' for more details on a specific command.</p>
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
