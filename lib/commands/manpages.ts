@@ -95,8 +95,8 @@ DESCRIPTION
         longDescription: 'Fetches and displays the current weather. If no city is provided, it will attempt to use your browser\'s location. As a fallback, it uses IP-based geolocation.',
         usage: 'weather [city?]',
         example: {
-            command: 'weather London',
-            output: `Weather for London, United Kingdom:
+            command: 'weather Balangir',
+            output: `Weather for Balangir, odisha:
 Currently: Partly cloudy, 15°C (feels like 14°C)
 Wind: 10 km/h from SW
 Humidity: 72%

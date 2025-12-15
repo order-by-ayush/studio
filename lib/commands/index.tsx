@@ -106,10 +106,11 @@ export const processCommand = async (cmd: string, args: string[], context: Comma
     const lowerCmd = cmd.toLowerCase();
 
     if (forbiddenCommands.includes(lowerCmd)) {
-        addOutput("You don't have permission to use this command.");
+        addOutput(<span style={{ color: 'red' }}>You don't have permission to use this command.</span>);
         playSound('error');
         return;
     }
+    
 
     let handler = commands[lowerCmd];
 

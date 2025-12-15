@@ -19,7 +19,7 @@ export const cd = async (args: string[], { currentDirectory, setCurrentDirectory
     if (currentPath === '/' && prankFolders.includes(path.split('/')[0])) {
          playSound('error');
          addOutput(
-             <div className="text-red-500">
+             <div className="text-red-600">
                  <p>YOU ARE NOT THE SUPER USER OR ADMIN OF THIS SITE</p>
                  <p>YOU NEED SUDO PRIVILEGE TO ACCESS THESE THINGS</p>
              </div>
@@ -41,7 +41,7 @@ export const cd = async (args: string[], { currentDirectory, setCurrentDirectory
         if (prankFolders.includes(newNode.name) && newNode.parent === root) {
              playSound('error');
              addOutput(
-                 <div className="text-red-500">
+                 <div className="text-red-600">
                      <p>YOU ARE NOT THE SUPER USER OR ADMIN OF THIS SITE</p>
                      <p>YOU NEED SUDO PRIVILEGE TO ACCESS THESE THINGS</p>
                  </div>

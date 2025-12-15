@@ -8,18 +8,30 @@ import { CommandContext } from '.';
 
 // Helper for date parsing
 const parseDate = (dateStr: string): Date | null => {
-  const formats = [
-    /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
-    /^\d{2}\/\d{2}\/\d{4}$/, // DD/MM/YYYY
-  ];
-  if (formats[0].test(dateStr)) return new Date(dateStr);
-  if (formats[1].test(dateStr)) {
-    const [day, month, year] = dateStr.split('/');
-    return new Date(`${year}-${month}-${day}`);
-  }
-  return null;
-};
-
+    const iso = /^\d{4}-\d{2}-\d{2}$/;               // YYYY-MM-DD
+    const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;   // D/M/YYYY or DD/MM/YYYY
+  
+    // Case 1: ISO format YYYY-MM-DD
+    if (iso.test(dateStr)) {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? null : d;
+    }
+  
+    // Case 2: D/M/YYYY or DD/MM/YYYY
+    const match = dateStr.match(dmy);
+    if (match) {
+      const [, dayStr, monthStr, yearStr] = match;
+      const day = Number(dayStr);
+      const month = Number(monthStr);
+      const year = Number(yearStr);
+  
+      const d = new Date(year, month - 1, day);
+      return isNaN(d.getTime()) ? null : d;
+    }
+  
+    return null;
+  };
+  
 export const age = async (args: string[]) => {
   if (!args.length) return 'Usage: age [YYYY-MM-DD|DD/MM/YYYY]';
   const date = parseDate(args[0]);
@@ -111,8 +123,8 @@ export const calendar = async (args: string[]) => {
     let day = 1;
 
     // ANSI escape code for highlighting
-    const highlightStart = `\x1b[7m`;
-    const highlightEnd = `\x1b[0m`;
+    const highlightStart = `\x1b`;
+    const highlightEnd = `\x1b`;
 
     const isCurrentMonthAndYear = month === now.getMonth() && year === now.getFullYear();
 
@@ -156,7 +168,7 @@ export const clear = async (args: string[], { clearHistory }: CommandContext) =>
   // No return value, handled by processCommand
 };
 
-export const coin = async () => (Math.random() < 0.5 ? 'Heads 🪙' : 'Tails 🪙');
+export const coin = async () => (Math.random() < 0.5 ? 'Heeads 🪙' : 'Taails 🪙');
 
 export const countdays = async (args: string[]) => {
   if (!args.length) return 'Usage: countdays [YYYY-MM-DD|DD/MM/YYYY]';
@@ -175,7 +187,7 @@ export const dice = async (args: string[]) => {
   const sides = args[0] ? parseInt(args[0], 10) : 6;
   if (isNaN(sides) || sides < 1) return 'Invalid number of sides.';
   const roll = Math.floor(Math.random() * sides) + 1;
-  return `Rolled a ${sides}-sided die: ${roll} 🎲`;
+  return `Roolled a ${sides}-sided die: ${roll} 🎲`;
 };
 
 export const hash = async (args: string[]) => {
@@ -272,7 +284,7 @@ export const rps = async (args: string[]) => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('rps-score', JSON.stringify(rpsScore));
     }
-    return `You chose ${playerChoice}, AI chose ${aiChoice}. ${result} Score: Player ${rpsScore.player} - AI ${rpsScore.ai}`;
+    return `Yoou chose ${playerChoice}, AI chose ${aiChoice}. ${result} Score: Player ${rpsScore.player} - AI ${rpsScore.ai}`;
 };
 
 
