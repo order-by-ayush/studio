@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { staticCommands } from './static';
 import * as apiCmds from './api';
@@ -6,6 +7,8 @@ import * as fsCmds from './fs';
 import { sysinfo } from './sysinfo';
 import { Directory } from '@/lib/filesystem';
 import { Theme } from '@/lib/themes';
+import { fuzzyCommandAutocomplete } from '@/ai/flows/fuzzy-command-autocomplete';
+import { commandDescriptions } from './static';
 
 type MatrixState = {
     active: boolean;
@@ -44,12 +47,46 @@ type CommandHandler = (args: string[], context: CommandContext) => Promise<React
 
 const forbiddenCommands = ['sudo', 'passwd', 'su', 'useradd', 'adduser', 'chmod', 'install', 'rm'];
 
+const ai = async (args: string[]) => {
+    const partialCommand = args.join(' ');
+    if (!partialCommand) {
+        return 'Usage: ai [partial command]';
+    }
+    try {
+        const { suggestions } = await fuzzyCommandAutocomplete({
+            partialCommand,
+            availableCommands: commandDescriptions,
+        });
+
+        if (!suggestions || suggestions.length === 0) {
+            return 'No suggestions found.';
+        }
+
+        return (
+            <div>
+                <p>AI Suggestions for "{partialCommand}":</p>
+                {suggestions.map((s, i) => (
+                    <p key={i}>- {s.command}: {s.description}</p>
+                ))}
+            </div>
+        );
+    } catch (error: any) {
+        console.error(error);
+        if (error.message && error.message.includes('429')) {
+             return 'Error: You have exceeded the API quota for AI suggestions. Please check your plan and billing details.';
+        }
+        return 'An error occurred while fetching AI suggestions.';
+    }
+};
+
+
 const commands: Record<string, CommandHandler> = {
     ...staticCommands,
     ...apiCmds,
     ...dynamicCmds,
     ...fsCmds,
     sysinfo,
+    ai,
 };
 
 export const commandList = Object.keys(commands).filter(c => c !== '?'); // Exclude alias from the main list
@@ -69,10 +106,11 @@ export const processCommand = async (cmd: string, args: string[], context: Comma
     const lowerCmd = cmd.toLowerCase();
 
     if (forbiddenCommands.includes(lowerCmd)) {
-        addOutput("You don't have permission to use this command.");
+        addOutput(<span style={{ color: 'red' }}>You don't have permission to use this command.</span>);
         playSound('error');
         return;
     }
+    
 
     let handler = commands[lowerCmd];
 

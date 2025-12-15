@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inconsolata } from 'next/font/google';
 import './globals.css';

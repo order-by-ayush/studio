@@ -1,8 +1,9 @@
+
 'use client';
+
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
-import { fuzzyCommandAutocomplete, FuzzyAutocompleteOutput } from '@/ai/flows/fuzzy-command-autocomplete';
-import { commandDescriptions } from '@/lib/commands/static';
 import { cn } from '@/lib/utils';
+import { commandList } from '@/lib/commands';
 
 interface PromptProps {
   promptText: string;
@@ -18,10 +19,8 @@ export interface PromptHandle {
 const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, history, disabled }, ref) => {
   const [input, setInput] = useState('');
   const [suggestion, setSuggestion] = useState('');
-  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<FuzzyAutocompleteOutput['suggestions']>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -29,42 +28,16 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     },
   }));
 
-  const fetchSuggestions = useCallback(async (partialCommand: string) => {
-    if (!partialCommand) {
-      setAutocompleteSuggestions([]);
-      setSuggestion('');
-      return;
-    }
-    try {
-      const { suggestions } = await fuzzyCommandAutocomplete({
-        partialCommand,
-        availableCommands: commandDescriptions,
-      });
-      if (suggestions && suggestions.length > 0) {
-        setSuggestion(suggestions[0].command);
-        setAutocompleteSuggestions(suggestions.slice(0, 3));
-      } else {
-        setSuggestion('');
-        setAutocompleteSuggestions([]);
-      }
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-      setSuggestion('');
-      setAutocompleteSuggestions([]);
-    }
+  const getSuggestion = useCallback((currentInput: string) => {
+    if (!currentInput) return '';
+    const matchingCommand = commandList.find(c => c.startsWith(currentInput.toLowerCase()));
+    return matchingCommand || '';
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newText = e.currentTarget.value || '';
     setInput(newText);
-    
-    if (suggestionTimeoutRef.current) {
-        clearTimeout(suggestionTimeoutRef.current);
-    }
-    
-    suggestionTimeoutRef.current = setTimeout(() => {
-        fetchSuggestions(newText);
-    }, 150); // debounce requests
+    setSuggestion(getSuggestion(newText));
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -75,11 +48,10 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
     
     if (e.key === 'Enter') {
       e.preventDefault();
-      const commandToSubmit = suggestion && input.trim() !== '' ? suggestion : input;
+      const commandToSubmit = input.trim();
       onSubmit(commandToSubmit);
       setInput('');
       setSuggestion('');
-      setAutocompleteSuggestions([]);
       setHistoryIndex(-1);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -88,7 +60,6 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
         setHistoryIndex(newIndex);
         setInput(history[newIndex]);
         setSuggestion('');
-        setAutocompleteSuggestions([]);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -97,34 +68,22 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
         setHistoryIndex(newIndex);
         setInput(history[newIndex]);
         setSuggestion('');
-        setAutocompleteSuggestions([]);
       } else if (historyIndex === 0) {
         setHistoryIndex(-1);
         setInput('');
         setSuggestion('');
-        setAutocompleteSuggestions([]);
       }
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      if (suggestion) {
-        setInput(suggestion);
-        setSuggestion('');
-        setAutocompleteSuggestions([]);
-      }
+    } else if (e.key === 'Tab' || e.key === 'ArrowRight') {
+        if (suggestion && input) {
+            e.preventDefault();
+            setInput(suggestion);
+            setSuggestion('');
+        }
     } else if (e.key === 'Escape') {
       setInput('');
       setSuggestion('');
-      setAutocompleteSuggestions([]);
     }
   };
-
-  useEffect(() => {
-    return () => {
-        if(suggestionTimeoutRef.current) {
-            clearTimeout(suggestionTimeoutRef.current);
-        }
-    }
-  }, [])
 
   return (
     <div>
@@ -152,14 +111,6 @@ const Prompt = forwardRef<PromptHandle, PromptProps>(({ promptText, onSubmit, hi
             )}
         </div>
       </div>
-      {autocompleteSuggestions.length > 0 && input.trim() && (
-          <div className="pl-2 mt-1 text-muted-foreground text-sm">
-              <div>Suggestions:</div>
-              {autocompleteSuggestions.map(s => (
-                  <div key={s.command}>- {s.command}: {s.description}</div>
-              ))}
-          </div>
-      )}
     </div>
   );
 });

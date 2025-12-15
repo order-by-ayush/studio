@@ -53,7 +53,6 @@ export const sysinfo = async () => {
         'Uptime': uptimeStr,
     };
 
-    // This fetches the user's public IP details.
     const ipData: any = await actions.getIpInfo();
     let countryData: any = {};
     if (ipData && !ipData.error) {
@@ -64,7 +63,7 @@ export const sysinfo = async () => {
         : 'N/A';
 
     const ipInfo = {
-        'Your IP Address': ipData.query || 'N/A',
+        'IP Address': ipData.query || 'N/A',
         'City': ipData.city || 'N/A',
         'Region': ipData.regionName || 'N/A',
         'Country': ipData.country || 'N/A',
@@ -72,7 +71,7 @@ export const sysinfo = async () => {
         'Latitude/Long.': ipData.lat && ipData.lon ? `${ipData.lat}, ${ipData.lon}` : 'N/A',
         'Currency': currencyInfo,
         'Time Zone (IP)': ipData.timezone || 'N/A',
-        'ISP / Org': ipData.isp || ipData.org || 'N/A',
+        'Org': ipData.org || 'N/A',
         'ASN': ipData.as || 'N/A',
     };
 
@@ -90,8 +89,8 @@ export const sysinfo = async () => {
             
             <br />
 
-            <p className="font-bold">YOUR DEVICE IP INFORMATION</p>
-            <p className="font-bold">--------------------------</p>
+            <p className="font-bold">IP INFORMATION</p>
+            <p className="font-bold">--------------</p>
             <table>
                  <tbody>
                     {Object.entries(ipInfo).map(([key, value]) => (
@@ -102,4 +101,3 @@ export const sysinfo = async () => {
         </div>
     );
 };
-

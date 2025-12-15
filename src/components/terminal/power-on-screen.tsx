@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -37,7 +38,7 @@ const PowerOnScreen = ({ onFinished }: PowerOnScreenProps) => {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center h-full w-full">
-      <div className="text-left font-mono w-[400px] space-y-4">
+      <div className="text-left font-mono w-full max-w-md px-4 space-y-4">
         <Typewriter
           text={powerOnMessages}
           speed={50}

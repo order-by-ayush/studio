@@ -1,13 +1,14 @@
+
 import React from 'react';
-import { isTheme, themes } from '@/lib/themes';
-import { commandList } from './index';
+import { themes } from '../themes';
 import { manPages } from './manpages';
-import { findNode, root } from '@/lib/filesystem';
+import { findNode, root } from '../filesystem';
 
 export const commandDescriptions: Record<string, string> = {
   '?': 'Alias for help.',
   about: 'Displays my biography, education, and skills.',
   age: 'Calculate age from a given date. Usage: age YYYY-MM-DD',
+  ai: 'Get AI-powered command suggestions. Usage: ai [partial command]',
   ascii: 'Convert text to ASCII art. Usage: ascii [text] [font?]',
   asciiqr: 'Generate an ASCII QR code from text. Usage: asciiqr [text]',
   ayush: 'Opens my personal portfolio website in a new tab.',
@@ -61,6 +62,15 @@ export const commandDescriptions: Record<string, string> = {
   whoami: 'Display current user and system info.',
 };
 
+const CommandSection = ({ title, commands }: { title: string, commands: string[] }) => (
+    <div className="mb-2">
+        <p className="text-primary font-bold">{title}:</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-1">
+            {commands.sort().map(cmd => <span key={cmd}>{cmd}</span>)}
+        </div>
+    </div>
+);
+
 export const help = async (args: string[]) => {
   if (args.length > 0) {
     const cmd = args[0].toLowerCase();
@@ -70,35 +80,22 @@ export const help = async (args: string[]) => {
     return `Command not found: ${cmd}`;
   }
 
-  const allCommands = commandList.sort();
-  const maxLength = 12;
-  const numColumns = 8;
-  const numRows = Math.ceil(allCommands.length / numColumns);
-  let output = 'Available commands:\n';
-  const columns: string[][] = Array(numColumns).fill(0).map(() => []);
-
-  for (let i = 0; i < allCommands.length; i++) {
-    columns[i % numColumns].push(allCommands[i]);
-  }
-
-  const flattened = columns.reduce((acc, val) => acc.concat(val), []);
+  const commandCategories = {
+    Terminal: ['about', 'ayush', 'contact', 'projects', 'resume', 'social'],
+    System: ['calendar', 'country', 'date', 'ping', 'reset', 'set', 'sysinfo', 'time', 'uptime', 'username', 'uuid', 'weather'],
+    Interact: ['age', 'ascii', 'asciiqr', 'coin', 'countdays', 'dice', 'matrix', 'qr', 'remind', 'rps', 'shorten', 'stopwatch', 'theme', 'timer'],
+    Encrypt: ['base64', 'hash'],
+    Info: ['curl', 'dns', 'dnslookup', 'geo', 'github', 'ip', 'json'],
+    Boot: ['poweron', 'shutdown'],
+    Other: ['ai', 'cat', 'cd', 'clear', 'commands', 'help', 'history', 'ls', 'man', 'pwd', 'whoami'],
+  };
   
-  let resultGrid = '';
-  for (let i = 0; i < numRows; i++) {
-    let row = '';
-    for (let j = 0; j < numColumns; j++) {
-      const index = j * numRows + i;
-      if (flattened[index]) {
-         row += flattened[index].padEnd(maxLength);
-      }
-    }
-    resultGrid += row + '\n';
-  }
-
-
   return (
     <div>
-      <pre className="whitespace-pre-wrap">{resultGrid}</pre>
+        <p className="mb-2">Available commands:</p>
+        {Object.entries(commandCategories).map(([title, commands]) => (
+            <CommandSection key={title} title={title} commands={commands} />
+        ))}
       <p className="mt-2">Type 'help [command]' for more details on a specific command.</p>
       <p>Type 'commands' to see a list with descriptions.</p>
       <p>Type 'man [command]' to see a detailed manual for a command.</p>
@@ -140,7 +137,7 @@ export const man = async (args: string[]) => {
           <p className="font-bold text-accent">EXAMPLE</p>
           <div className="ml-4">
             <p>The following command:</p>
-            <pre className="p-2 my-1 bg-muted rounded font-mono text-sm whitespace-pre-wrap">> {page.example.command}</pre>
+            <pre className="p-2 my-1 bg-muted rounded font-mono text-sm whitespace-pre-wrap">{'>'} {page.example.command}</pre>
             <p>Will produce the following output:</p>
             <pre className="p-2 my-1 bg-muted rounded font-mono text-sm whitespace-pre-wrap">{page.example.output}</pre>
           </div>
@@ -152,12 +149,13 @@ export const man = async (args: string[]) => {
 
 
 export const commands = async () => {
-    const allCommands = commandList.sort();
+    const allCommands = Object.keys(commandDescriptions).sort();
     const maxLength = Math.max(...allCommands.map(cmd => cmd.length));
     const commandDetails = allCommands.map(cmd => {
+      if (cmd === '?') return null; // Don't show alias in this list
       const description = commandDescriptions[cmd]?.split('.')[0] || 'No description available.';
       return `${cmd.padEnd(maxLength + 4)}${description}`;
-    }).join('\n');
+    }).filter(Boolean).join('\n');
     
     return (
         <div>
@@ -241,7 +239,7 @@ export const theme = async () => {
     return (
         <div>
             <p>Available themes:</p>
-            <ul className="list-disc list-inside grid grid-cols-3 gap-x-4">
+            <ul className="list-disc list-inside grid grid-cols-2 md:grid-cols-3 gap-x-2">
                 {themes.map(t => <li key={t}>{t}</li>)}
             </ul>
             <p className="mt-2">Usage: set theme [theme-name]</p>
